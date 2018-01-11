@@ -7,3 +7,6 @@ dureeConso = 5 #En minutes
 dateConsoDT = datetime.datetime.now() - datetime.timedelta(minutes=dureeConso)
 dateConsoDT = dateConsoDT.replace(second = 0)
 calculerResume(dateConsoDT, dureeConso)
+
+# dateConsoDT = datetime.datetime(2018,1,11,18,15,0)
+# calculerResumeOfResume(dateConsoDT, 5, 15)

@@ -84,3 +84,66 @@ def calculerResume(dateConsoDT, dureeConso):
         requete = mysql.cursor()
         requete.execute('INSERT INTO `resumeStatus` (`id`, `code`, `date`, `duree`, `nbBikeMin`, `nbBikeMax`, `nbBikeMoyenne`, `nbBikePris`, `nbBikeRendu`, `nbEBikeMin`, `nbEBikeMax`, `nbEBikeMoyenne`, `nbEBikePris`, `nbEBikeRendu`, `nbFreeEDockMin`, `nbFreeEDockMax`, `nbFreeEDockMoyenne`, `nbEDock`, `nbBikeOverflowMin`, `nbBikeOverflowMax`, `nbBikeOverflowMoyenne`, `nbEBikeOverflowMin`, `nbEBikeOverflowMax`, `nbEBikeOverflowMoyenne`, `maxBikeOverflow`) VALUES \
         (NULL, '+str(codeStation)+', "'+dateConso+'", '+str(dureeConso)+', '+str(valeurs['nbBike']['min'])+', '+str(valeurs['nbBike']['max'])+', '+str(valeurs['nbBike']['moyenne'])+', '+str(valeurs['nbBike']['pris'])+', '+str(valeurs['nbBike']['remis'])+', '+str(valeurs['nbEBike']['min'])+', '+str(valeurs['nbEBike']['max'])+', '+str(valeurs['nbEBike']['moyenne'])+', '+str(valeurs['nbEBike']['pris'])+', '+str(valeurs['nbEBike']['remis'])+', '+str(valeurs['nbFreeEDock']['min'])+', '+str(valeurs['nbFreeEDock']['max'])+', '+str(valeurs['nbFreeEDock']['moyenne'])+', '+str(valeurs['nbEDock'])+', '+str(valeurs['nbBikeOverflow']['min'])+', '+str(valeurs['nbBikeOverflow']['max'])+', '+str(valeurs['nbBikeOverflow']['moyenne'])+', '+str(valeurs['nbEBikeOverflow']['min'])+', '+str(valeurs['nbEBikeOverflow']['max'])+', '+str(valeurs['nbEBikeOverflow']['moyenne'])+', '+str(valeurs['maxBikeOverflow'])+')')
+
+def calculerResumeOfResume(dateConsoDT, dureeConsoOrigine, dureeConsoFinale):
+    dateConso = dateConsoDT.strftime("%Y-%m-%d %H:%M:%S")
+    finConso = dateConsoDT + datetime.timedelta(minutes=dureeConsoFinale)
+    dateConsoFin = finConso.strftime("%Y-%m-%d %H:%M:%S")
+
+    #On récupère les conso
+    proprietes = ['nbBikeMin', 'nbBikeMax', 'nbBikeMoyenne', 'nbBikePris', 'nbBikeRendu', 'nbEBikeMin', 'nbEBikeMax', 'nbEBikeMoyenne', 'nbEBikePris', 'nbEBikeRendu', 'nbFreeEDockMin', 'nbFreeEDockMax', 'nbFreeEDockMoyenne', 'nbEDock', 'nbBikeOverflowMin', 'nbBikeOverflowMax', 'nbBikeOverflowMoyenne', 'nbEBikeOverflowMin', 'nbEBikeOverflowMax', 'nbEBikeOverflowMoyenne', 'maxBikeOverflow']
+    
+    mysql = getMysqlConnection()
+    requete = mysql.cursor()
+    requete.execute("SELECT code, "+', '.join(proprietes)+" FROM `resumeStatus` WHERE duree = "+str(dureeConsoOrigine)+" and date >= '"+dateConso+"' and date < '"+dateConsoFin+"' order by code")
+    consos = requete.fetchall()
+    precedentCode = None
+    infosCourantes = {}
+    for row in consos:
+        codeStation = int(row[0])
+
+        if precedentCode != None and precedentCode != codeStation: #On change de station
+            #On enregistre la conso
+            enregistrerConso(mysql, proprietes, infosCourantes, precedentCode, dateConso, dureeConsoFinale)
+            infosCourantes = {}
+
+        for i, cle in enumerate(proprietes):
+            if cle[-7:] == 'Moyenne':
+                valeurProp = float(row[i+1])
+            else:
+                valeurProp = int(row[i+1])
+            
+            if cle in infosCourantes:
+                if cle[-7:] == 'Moyenne':
+                    infosCourantes[cle].append(valeurProp)
+                elif cle[-3:] == 'Min':
+                    infosCourantes[cle] = min(infosCourantes[cle], valeurProp)
+                elif cle[-3:] == 'Max' or cle == 'maxBikeOverflow' or cle == 'nbEDock':
+                    infosCourantes[cle] = max(infosCourantes[cle], valeurProp) 
+                else:
+                    infosCourantes[cle] += valeurProp 
+            else:
+                if cle[-7:] == 'Moyenne':
+                    infosCourantes[cle] = [valeurProp]
+                else:
+                    infosCourantes[cle] = valeurProp
+
+        precedentCode = codeStation
+    #Et on oublie pas le dernier !
+    enregistrerConso(mysql, proprietes, infosCourantes, precedentCode, dateConso, dureeConsoFinale)
+
+def enregistrerConso(mysql, proprietes, infosCourantes, codeStation, dateConso, dureeConso):
+    #On traite les moyennes et on prépare la requête
+    strValeurs = ""
+    for i, cle in enumerate(proprietes):
+        if cle[-7:] == 'Moyenne':
+            data = infosCourantes[cle]
+            moyenne = sum(data) / max(len(data), 1)
+            infosCourantes[cle] = moyenne
+        if i != 0:
+            strValeurs += ', '
+        strValeurs += str(infosCourantes[cle])
+    
+    requete = mysql.cursor()
+    requete.execute('INSERT INTO `resumeStatus` (`id`, `code`, `date`, `duree`, '+', '.join(proprietes)+') VALUES \
+    (NULL, '+str(codeStation)+', "'+dateConso+'", '+str(dureeConso)+', '+strValeurs+')')   
