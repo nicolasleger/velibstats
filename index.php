@@ -68,7 +68,7 @@ $statusStation = $requete->fetchAll();
                     echo '<td><a href="station.php?code='.$station['code'].'">'.displayCodeStation($station['code']).'</a></td>';
                     echo '<td>'.$station['name'].'</td>';
                     echo '<td>'.$station['dateOuverture'].'</td>';
-                    echo '<td>'.(($station['state'] == 'Operative' && $station['nbEDock'] != 0) ? 'OK' : 'KO').'</td>';
+                    echo '<td>'.(($station['state'] == 'Operative' && $station['nbEDock'] != 0) ? 'Ouverte' : 'En travaux').'</td>';
                     echo '<td>'.$station['nbBike'].'</td>';
                     echo '<td>'.$station['nbEBike'].'</td>';
                     echo '<td>'.$station['nbFreeEDock'].'/'.$station['nbEDock'].'</td>';
