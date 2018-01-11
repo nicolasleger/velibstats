@@ -1,0 +1,6 @@
+script/config.py
+script/config.server.py
+config.php
+config.server.php
+script/velibLib.py
+script/__pycache__/

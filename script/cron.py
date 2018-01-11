@@ -1,0 +1,3 @@
+import velibLib
+
+velibLib.getAllStation()
