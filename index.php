@@ -40,7 +40,7 @@ $statusStation = $requete->fetchAll();
         <ul>
             <li>Nombre de stations : <?php echo $conso['nbStation']; ?></li>
             <li>Nombre de vélos mécaniques disponible : <?php echo $conso['nbBike']; ?></li>
-            <li>Nombre de vélos électiques disponible : <?php echo $conso['nbEbike']; ?></li>
+            <li>Nombre de vélos électriques disponible : <?php echo $conso['nbEbike']; ?></li>
             <li>Nombre de bornes libres : <?php echo $conso['nbFreeEDock']; ?></li>
         </ul>
         <i>Dernière mise à jour : <?php echo $conso['date']; ?></i>
