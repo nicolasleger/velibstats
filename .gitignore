@@ -4,3 +4,4 @@ config.php
 config.server.php
 script/velibLib.py
 script/__pycache__/
+script/fixStation.py
