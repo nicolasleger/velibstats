@@ -28,7 +28,7 @@ $hier = new DateTime("-1day");
 $filtreDate = $hier->format('Y-m-d H:i:s');
 
 //Filtre 1 heure
-$heurePrecedente = new DateTime("-1hour");
+$heurePrecedente = new DateTime("-3hours");
 $filtreHeure = $heurePrecedente->format('Y-m-d H:i:s');
 
 //Stations
