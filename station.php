@@ -231,29 +231,29 @@ $resumeStatusStation = $requete->fetchAll();
                 datasets: [
                     {
                         type: 'line',
-                        borderColor : "rgba(104,221,46,0.5)",
-                        data : nbBikeMaxData,
+                        borderColor : "rgba(104,221,46,0.7)",
+                        data : nbBikeMoyenneData,
                         fill: false,
                         label: 'Vélos mécaniques (Moyenne)'
                     },
-                    /*{
+                    {
                         type: 'line',
-                        borderColor : "rgba(104,221,46,1)",
+                        borderColor : "rgba(104,221,46,0)",
+                        backgroundColor : "rgba(104,221,46,0.3)",
                         data : nbBikeMinData,
-                        fill: false,
-                        borderDash: [5, 15],
-                        showLine: false,
+                        fill: "+1",
+                        borderDash: [5, 5],
                         label: 'Vélos mécaniques (Min)'
                     },
                     {
                         type: 'line',
-                        borderColor : "rgba(104,221,46,1)",
+                        borderColor : "rgba(104,221,46,0)",
+                        backgroundColor : "rgba(104,221,46,0.3)",
                         fill: false,
-                        showLine: false,
-                        data : nbBikeMoyenneData,
-                        borderDash: [5, 15],
+                        data : nbBikeMaxData,
+                        borderDash: [5, 5],
                         label: 'Vélos mécaniques (Max)'
-                    },*/
+                    },
                     {
                         backgroundColor : "rgba(104,221,46,0.5)",
                         data : nbBikePrisData,
@@ -268,28 +268,28 @@ $resumeStatusStation = $requete->fetchAll();
                     {
                         type: 'line',
                         borderColor : "rgba(76, 213, 233, 0.5)",
-                        data : nbEBikeMaxData,
+                        data : nbEBikeMoyenneData,
                         fill: false,
                         label: 'Vélos électriques (Moyenne)'
                     },
-                    /*{
+                    {
                         type: 'line',
-                        borderColor : "rgba(76, 213, 233, 1)",
+                        borderColor : "rgba(76, 213, 233, 0)",
+                        backgroundColor : "rgba(76, 213, 233, 0.3)",
                         data : nbEBikeMinData,
-                        fill: false,
-                        borderDash: [5, 15],
-                        showLine: false,
+                        fill: "+1",
+                        borderDash: [5, 5],
                         label: 'Vélos électriques (Min)'
                     },
                     {
                         type: 'line',
-                        borderColor : "rgba(76, 213, 233, 1)",
+                        borderColor : "rgba(76, 213, 233, 0)",
+                        backgroundColor : "rgba(76, 213, 233, 0.3)",
                         fill: false,
-                        showLine: false,
-                        data : nbEBikeMoyenneData,
-                        borderDash: [5, 15],
+                        data : nbEBikeMaxData,
+                        borderDash: [5, 5],
                         label: 'Vélos électriques (Max)'
-                    },*/
+                    },
                     {
                         backgroundColor : "rgba(76, 213, 233, 0.5)",
                         data : nbEBikePrisData,
@@ -300,13 +300,6 @@ $resumeStatusStation = $requete->fetchAll();
                         data : nbEBikeRenduData,
                         label: 'Vélos électriques (Rendu)'
                     }
-                    
-                    /*,
-                    {
-                        backgroundColor : "rgba(76, 213, 233, 0.5)",
-                        data : nbEbikeData,
-                        label: 'Vélos électriques'
-                    }*/
                 ]
             };
             new Chart(chartBikesResume, {
