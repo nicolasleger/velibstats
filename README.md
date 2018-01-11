@@ -1,0 +1,2 @@
+Site permettant de suivre l'évolution des ouvertures des stations velib, ainsi que les vélos (mécaniques et électriques) disponible entre les stations.
+Ce site et ce projet n'est pas officiel, et n'est pas en rapport avec Vélib Métropôle, l'entreprise gérant le service ( http://www.velib-metropole.fr ).
