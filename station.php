@@ -27,10 +27,6 @@ if($station === false)
 $hier = new DateTime("-1day");
 $filtreDate = $hier->format('Y-m-d H:i:s');
 
-//Filtre 1 heure
-$heurePrecedente = new DateTime("-3hours");
-$filtreHeure = $heurePrecedente->format('Y-m-d H:i:s');
-
 //Stations
 $requete = $pdo->query('SELECT c.date, s.nbBike, s.nbEBike, s.nbFreeEDock, s.nbEDock 
 FROM status s 
@@ -38,13 +34,6 @@ INNER JOIN statusConso c ON c.id = s.idConso
 WHERE s.code = '.$code.' AND c.date >= "'.$filtreDate.'" 
 ORDER BY s.code ASC');
 $statusStation = $requete->fetchAll();
-
-//Resume
-$requete = $pdo->query('SELECT `date`, nbBikeMin, nbBikeMax, nbBikeMoyenne, nbBikePris, nbBikeRendu, nbEBikeMin, nbEBikeMax, nbEBikeMoyenne, nbEBikePris, nbEBikeRendu
-FROM resumeStatus 
-WHERE code = '.$code.' AND `date` >= "'.$filtreHeure.'"
-ORDER BY date ASC');
-$resumeStatusStation = $requete->fetchAll();
 ?>
 <!DOCTYPE html>
 <html>
@@ -113,33 +102,6 @@ $resumeStatusStation = $requete->fetchAll();
                     $dates[] = $statut['date'];
                     $nbFreeEdockData[] = $statut['nbFreeEDock'];
                 }
-
-                //Resume
-                $datesResume = [];
-                $nbBikeMinData = [];
-                $nbBikeMaxData = [];
-                $nbBikeMoyenneData = [];
-                $nbBikePrisData = [];
-                $nbBikeRenduData = [];
-                $nbEBikeMinData = [];
-                $nbEBikeMaxData = [];
-                $nbEBikeMoyenneData = [];
-                $nbEBikePrisData = [];
-                $nbEBikeRenduData = [];
-                foreach($resumeStatusStation as $statut)
-                {
-                    $datesResume[] = $statut['date'];
-                    $nbBikeMinData[] = $statut['nbBikeMin'];
-                    $nbBikeMaxData[] = $statut['nbBikeMax'];
-                    $nbBikeMoyenneData[] = $statut['nbBikeMoyenne'];
-                    $nbBikePrisData[] = -1*$statut['nbBikePris'];
-                    $nbBikeRenduData[] = $statut['nbBikeRendu'];
-                    $nbEBikeMinData[] = $statut['nbEBikeMin'];
-                    $nbEBikeMaxData[] = $statut['nbEBikeMax'];
-                    $nbEBikeMoyenneData[] = $statut['nbEBikeMoyenne'];
-                    $nbEBikePrisData[] = -1*$statut['nbEBikePris'];
-                    $nbEBikeRenduData[] = $statut['nbEBikeRendu'];
-                }
                 ?>
             </tbody>
         </table>
@@ -147,18 +109,6 @@ $resumeStatusStation = $requete->fetchAll();
         <?php
         echo 'var datesData = ["'.implode('","', $dates).'"];'."\n";
         echo 'var nbFreeEdockData = ['.implode(',', $nbFreeEdockData).'];'."\n";
-
-        echo 'var datesResumeData = ["'.implode('","', $datesResume).'"];'."\n";
-        echo 'var nbBikeMinData = ['.implode(',', $nbBikeMinData).'];'."\n";
-        echo 'var nbBikeMaxData = ['.implode(',', $nbBikeMaxData).'];'."\n";
-        echo 'var nbBikeMoyenneData = ['.implode(',', $nbBikeMoyenneData).'];'."\n";
-        echo 'var nbBikePrisData = ['.implode(',', $nbBikePrisData).'];'."\n";
-        echo 'var nbBikeRenduData = ['.implode(',', $nbBikeRenduData).'];'."\n";
-        echo 'var nbEBikeMinData = ['.implode(',', $nbEBikeMinData).'];'."\n";
-        echo 'var nbEBikeMaxData = ['.implode(',', $nbEBikeMaxData).'];'."\n";
-        echo 'var nbEBikeMoyenneData = ['.implode(',', $nbEBikeMoyenneData).'];'."\n";
-        echo 'var nbEBikePrisData = ['.implode(',', $nbEBikePrisData).'];'."\n";
-        echo 'var nbEBikeRenduData = ['.implode(',', $nbEBikeRenduData).'];'."\n";
         ?>
         </script>
         <script type="application/javascript">
@@ -195,97 +145,13 @@ $resumeStatusStation = $requete->fetchAll();
                 options: options
             });
 
-            var chartBikesResume = document.getElementById("chartBikesResume").getContext('2d');
-
-            var optionsResume = {
-                responsive: false,
-                scales: {
-                    yAxes: [{
-                        stacked: false
-                    }]
+            getData('api.php?action=getBikeResumeTroisHeures&codeStation=<?php echo $code; ?>').then(
+                function(data)
+                {
+                    var chartBikesResume = document.getElementById("chartBikesResume").getContext('2d');
+                    new Chart(chartBikesResume, data);
                 }
-            };
-            var dataResume = {
-                labels: datesResumeData,
-                datasets: [
-                    {
-                        type: 'line',
-                        borderColor : "rgba(104,221,46,0.7)",
-                        data : nbBikeMoyenneData,
-                        fill: false,
-                        label: 'Vélos mécaniques (Moyenne)'
-                    },
-                    {
-                        type: 'line',
-                        borderColor : "rgba(104,221,46,0)",
-                        backgroundColor : "rgba(104,221,46,0.3)",
-                        data : nbBikeMinData,
-                        fill: "+1",
-                        borderDash: [5, 5],
-                        label: 'Vélos mécaniques (Min)'
-                    },
-                    {
-                        type: 'line',
-                        borderColor : "rgba(104,221,46,0)",
-                        backgroundColor : "rgba(104,221,46,0.3)",
-                        fill: false,
-                        data : nbBikeMaxData,
-                        borderDash: [5, 5],
-                        label: 'Vélos mécaniques (Max)'
-                    },
-                    {
-                        backgroundColor : "rgba(104,221,46,0.5)",
-                        data : nbBikePrisData,
-                        label: 'Vélos mécaniques (Pris)'
-                    },
-                    {
-                        backgroundColor : "rgba(104,221,46,0.5)",
-                        data : nbBikeRenduData,
-                        label: 'Vélos mécaniques (Rendu)'
-                    },
-                    
-                    {
-                        type: 'line',
-                        borderColor : "rgba(76, 213, 233, 0.5)",
-                        data : nbEBikeMoyenneData,
-                        fill: false,
-                        label: 'Vélos électriques (Moyenne)'
-                    },
-                    {
-                        type: 'line',
-                        borderColor : "rgba(76, 213, 233, 0)",
-                        backgroundColor : "rgba(76, 213, 233, 0.3)",
-                        data : nbEBikeMinData,
-                        fill: "+1",
-                        borderDash: [5, 5],
-                        label: 'Vélos électriques (Min)'
-                    },
-                    {
-                        type: 'line',
-                        borderColor : "rgba(76, 213, 233, 0)",
-                        backgroundColor : "rgba(76, 213, 233, 0.3)",
-                        fill: false,
-                        data : nbEBikeMaxData,
-                        borderDash: [5, 5],
-                        label: 'Vélos électriques (Max)'
-                    },
-                    {
-                        backgroundColor : "rgba(76, 213, 233, 0.5)",
-                        data : nbEBikePrisData,
-                        label: 'Vélos électriques (Pris)'
-                    },
-                    {
-                        backgroundColor : "rgba(76, 213, 233, 0.5)",
-                        data : nbEBikeRenduData,
-                        label: 'Vélos électriques (Rendu)'
-                    }
-                ]
-            };
-            new Chart(chartBikesResume, {
-                type: 'bar',
-                data: dataResume,
-                options: optionsResume
-            });
+            );
 
             $(document).ready( function () {
                 $('#stats').DataTable({
