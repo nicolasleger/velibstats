@@ -200,12 +200,12 @@ function getDataBikeResume($codeStation, $filtre, $periode)
             ),
             array(
                 'label' => 'Vélos mécaniques (Pris)',
-                'borderColor' => 'rgba(104,221,46,0.5)',
+                'backgroundColor' => 'rgba(104,221,46,0.5)',
                 'data' => $nbBikePrisData
             ),
             array(
                 'label' => 'Vélos mécaniques (Rendu)',
-                'borderColor' => 'rgba(104,221,46,0.5)',
+                'backgroundColor' => 'rgba(104,221,46,0.5)',
                 'data' => $nbBikeRenduData
             ),
             array(
@@ -235,12 +235,12 @@ function getDataBikeResume($codeStation, $filtre, $periode)
             ),
             array(
                 'label' => 'Vélos électriques (Pris)',
-                'borderColor' => 'rgba(76, 213, 233, 0.5)',
+                'backgroundColor' => 'rgba(76, 213, 233, 0.5)',
                 'data' => $nbEBikePrisData
             ),
             array(
                 'label' => 'Vélos électriques (Rendu)',
-                'borderColor' => 'rgba(76, 213, 233, 0.5)',
+                'backgroundColor' => 'rgba(76, 213, 233, 0.5)',
                 'data' => $nbEBikeRenduData
             )
         )
