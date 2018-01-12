@@ -56,6 +56,7 @@ $resumeStatusStation = $requete->fetchAll();
         <link rel="stylesheet" type="text/css" href="datatables.min.css"/>
  
         <script type="text/javascript" src="datatables.min.js"></script>
+        <script type="text/javascript" src="script.js"></script>
 
         <style type="text/css">
         table, tr, td, th
@@ -99,8 +100,6 @@ $resumeStatusStation = $requete->fetchAll();
                 <?php
                 //On définie les points pour les graphs
                 $dates = [];
-                $nbBikeData = [];
-                $nbEbikeData = [];
                 $nbFreeEdockData = [];
                 foreach($statusStation as $statut)
                 {
@@ -112,8 +111,6 @@ $resumeStatusStation = $requete->fetchAll();
                     echo '</tr>';
 
                     $dates[] = $statut['date'];
-                    $nbBikeData[] = $statut['nbBike'];
-                    $nbEbikeData[] = $statut['nbEBike'];
                     $nbFreeEdockData[] = $statut['nbFreeEDock'];
                 }
 
@@ -149,8 +146,6 @@ $resumeStatusStation = $requete->fetchAll();
         <script type="text/javascript">
         <?php
         echo 'var datesData = ["'.implode('","', $dates).'"];'."\n";
-        echo 'var nbBikeData = ['.implode(',', $nbBikeData).'];'."\n";
-        echo 'var nbEbikeData = ['.implode(',', $nbEbikeData).'];'."\n";
         echo 'var nbFreeEdockData = ['.implode(',', $nbFreeEdockData).'];'."\n";
 
         echo 'var datesResumeData = ["'.implode('","', $datesResume).'"];'."\n";
@@ -167,6 +162,14 @@ $resumeStatusStation = $requete->fetchAll();
         ?>
         </script>
         <script type="application/javascript">
+            getData('api.php?action=getBikeInstantane&codeStation=<?php echo $code; ?>').then(
+                function(data)
+                {
+                    var chartBikes = document.getElementById("chartBikes").getContext('2d');
+                    new Chart(chartBikes, data);
+                }
+            );
+
             var options = {
                 responsive: false,
                 scales: {
@@ -175,30 +178,6 @@ $resumeStatusStation = $requete->fetchAll();
                     }]
                 }
             };
-
-            var chartBikes = document.getElementById("chartBikes").getContext('2d');
-            var dataBike = {
-                labels: datesData,
-                datasets: [
-                    {
-                        backgroundColor : "rgba(104,221,46,0.5)",
-                        data : nbBikeData,
-                        label: 'Vélos mécaniques'
-                    },
-                    {
-                        backgroundColor : "rgba(76, 213, 233, 0.5)",
-                        data : nbEbikeData,
-                        label: 'Vélos électriques'
-                    }
-                ]
-            };
-
-            new Chart(chartBikes, {
-                type: 'line',
-                data: dataBike,
-                options: options
-            });
-
             var chartBornesLibres = document.getElementById("chartBornesLibres").getContext('2d');
             var data = {
                 labels: datesData,
