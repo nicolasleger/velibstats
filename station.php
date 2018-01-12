@@ -70,10 +70,18 @@ $statusStation = $requete->fetchAll();
             <li>Adresse la plus proche (selon <a href="https://adresse.data.gouv.fr/">BAN</a>) : <?php echo $station['adresse']; ?></li>
         </ul>
         <h2>Graphiques temps réel</h2>
+        <select id="typeGraphiqueSelect">
+            <option value="bike">Vélos disponibles</option>
+        </select>
+        <select id="dureeGraphiqueSelect">
+            <option value="instantanee">Une heure - Instantanée</option>
+            <option value="troisHeures">Trois heures - Période de 5 minutes</option>
+            <option value="unJour" selected>Un jour - Période de 15 minutes</option>
+            <option value="septJours">Une semaine - Période d'une heure</option>
+            <option value="unMois">Un mois - Période de six heures</option>
+        </select>
         <canvas id="chartBikes" width="1000" height="400"></canvas>
         <canvas id="chartBornesLibres" width="1000" height="400"></canvas>
-        <h2>Graphiques résumé (en test)</h2>
-        <canvas id="chartBikesResume" width="1000" height="400"></canvas>
         <i>Ce site n'est pas un site officiel de vélib métropole. Les données utilisées proviennent de <a href="http://www.velib-metropole.fr">www.velib-metropole.fr</a> et appartienne à leur propriétaire. - <a href="https://framagit.org/JonathanMM/velibstats">Site du projet</a></i>
         <h2>Stats</h2>
         <table id="stats">
@@ -107,19 +115,12 @@ $statusStation = $requete->fetchAll();
         </table>
         <script type="text/javascript">
         <?php
+        echo 'var codeStation = '.$code.';'."\n";
         echo 'var datesData = ["'.implode('","', $dates).'"];'."\n";
         echo 'var nbFreeEdockData = ['.implode(',', $nbFreeEdockData).'];'."\n";
         ?>
         </script>
         <script type="application/javascript">
-            getData('api.php?action=getBikeInstantane&codeStation=<?php echo $code; ?>').then(
-                function(data)
-                {
-                    var chartBikes = document.getElementById("chartBikes").getContext('2d');
-                    new Chart(chartBikes, data);
-                }
-            );
-
             var options = {
                 responsive: false,
                 scales: {
@@ -144,14 +145,6 @@ $statusStation = $requete->fetchAll();
                 data: data,
                 options: options
             });
-
-            getData('api.php?action=getBikeResumeTroisHeures&codeStation=<?php echo $code; ?>').then(
-                function(data)
-                {
-                    var chartBikesResume = document.getElementById("chartBikesResume").getContext('2d');
-                    new Chart(chartBikesResume, data);
-                }
-            );
 
             $(document).ready( function () {
                 $('#stats').DataTable({
