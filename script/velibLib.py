@@ -48,10 +48,9 @@ def getAllStation():
         
         #Et on prend les infos de l'état actuel de la station
         ok = True
-        if infoStation['state'] == 'Operative':
+        if infoStation['state'] == 'Work in progress' and codeStation == 10006:
             #Exception pour le moment sur cette station
-            if codeStation == 10006:
-                ok = False
+            ok = False
 
         if ok:
             requete = mysql.cursor()
