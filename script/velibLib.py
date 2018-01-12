@@ -36,7 +36,7 @@ def getAllStation():
         if codeStation not in stations:
             longitude = infoStation['gps']['longitude']
             latitude = infoStation['gps']['latitude']
-            if 'dueDate' in infoStation and infoStation['dueDate'] != None:
+            if infoStation['state'] != 'Operative' and 'dueDate' in infoStation and infoStation['dueDate'] != None:
                 dateOuverture = datetime.fromtimestamp(infoStation['dueDate'])
                 strDateOuverture = '"'+dateOuverture.strftime("%Y-%m-%d")+'"'
             else:
