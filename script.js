@@ -40,13 +40,16 @@ function changerDateGraphe()
     }
 }
 
+var graphInstance = null;
 function displayGraph(actionUrl)
 {
     getData('api.php?action='+actionUrl+'&codeStation='+codeStation).then(
         function(data)
         {
+            if(graphInstance != null)
+                graphInstance.destroy();
             var chartBikes = $("#chartBikes")[0].getContext('2d');
-            new Chart(chartBikes, data);
+            graphInstance = new Chart(chartBikes, data);
         }
     );
 }
