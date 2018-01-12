@@ -149,14 +149,14 @@ def enregistrerConso(mysql, proprietes, infosCourantes, codeStation, dateConso, 
         requete.execute('INSERT INTO `resumeStatus` (`id`, `code`, `date`, `duree`, '+', '.join(proprietes)+') VALUES \
         (NULL, '+str(codeStation)+', "'+dateConso+'", '+str(dureeConso)+', '+strValeurs+')')
 
-def debuterCalculResume(periode):
-    dateConsoDT = datetime.datetime.now() - datetime.timedelta(minutes=periode)
+def debuterCalculResume(periode, dateCourante = datetime.datetime.now()):
+    dateConsoDT = dateCourante - datetime.timedelta(minutes=periode)
     debutPeriodeMinute = dateConsoDT.minute % periode
     dateConsoDT = dateConsoDT.replace(microsecond = 0, second = 0, minute=dateConsoDT.minute - debutPeriodeMinute)
     calculerResume(dateConsoDT, periode)
 
-def debuterCalculResumeOfResume(periodeOrigine, periodeFinale):
-    dateConsoDT = datetime.datetime.now() - datetime.timedelta(minutes=periodeFinale)
+def debuterCalculResumeOfResume(periodeOrigine, periodeFinale, dateCourante = datetime.datetime.now()):
+    dateConsoDT = dateCourante - datetime.timedelta(minutes=periodeFinale)
     debutPeriodeMinute = (dateConsoDT.hour * 60 + dateConsoDT.minute) % periodeFinale
     dateConsoDT = dateConsoDT.replace(microsecond = 0, second = 0) - datetime.timedelta(minutes=debutPeriodeMinute)
     calculerResumeOfResume(dateConsoDT, periodeOrigine, periodeFinale)
