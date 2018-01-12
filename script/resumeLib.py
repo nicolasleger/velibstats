@@ -134,22 +134,29 @@ def calculerResumeOfResume(dateConsoDT, dureeConsoOrigine, dureeConsoFinale):
 
 def enregistrerConso(mysql, proprietes, infosCourantes, codeStation, dateConso, dureeConso):
     #On traite les moyennes et on prépare la requête
-    strValeurs = ""
-    for i, cle in enumerate(proprietes):
-        if cle[-7:] == 'Moyenne':
-            data = infosCourantes[cle]
-            moyenne = sum(data) / max(len(data), 1)
-            infosCourantes[cle] = moyenne
-        if i != 0:
-            strValeurs += ', '
-        strValeurs += str(infosCourantes[cle])
-    
-    requete = mysql.cursor()
-    requete.execute('INSERT INTO `resumeStatus` (`id`, `code`, `date`, `duree`, '+', '.join(proprietes)+') VALUES \
-    (NULL, '+str(codeStation)+', "'+dateConso+'", '+str(dureeConso)+', '+strValeurs+')')
+    if infosCourantes != {}:
+        strValeurs = ""
+        for i, cle in enumerate(proprietes):
+            if cle[-7:] == 'Moyenne':
+                data = infosCourantes[cle]
+                moyenne = sum(data) / max(len(data), 1)
+                infosCourantes[cle] = moyenne
+            if i != 0:
+                strValeurs += ', '
+            strValeurs += str(infosCourantes[cle])
+        
+        requete = mysql.cursor()
+        requete.execute('INSERT INTO `resumeStatus` (`id`, `code`, `date`, `duree`, '+', '.join(proprietes)+') VALUES \
+        (NULL, '+str(codeStation)+', "'+dateConso+'", '+str(dureeConso)+', '+strValeurs+')')
 
 def debuterCalculResume(periode):
     dateConsoDT = datetime.datetime.now() - datetime.timedelta(minutes=periode)
     debutPeriodeMinute = dateConsoDT.minute % periode
     dateConsoDT = dateConsoDT.replace(microsecond = 0, second = 0, minute=dateConsoDT.minute - debutPeriodeMinute)
     calculerResume(dateConsoDT, periode)
+
+def debuterCalculResumeOfResume(periodeOrigine, periodeFinale):
+    dateConsoDT = datetime.datetime.now() - datetime.timedelta(minutes=periodeFinale)
+    debutPeriodeMinute = (dateConsoDT.hour * 60 + dateConsoDT.minute) % periodeFinale
+    dateConsoDT = dateConsoDT.replace(microsecond = 0, second = 0) - datetime.timedelta(minutes=debutPeriodeMinute)
+    calculerResumeOfResume(dateConsoDT, periodeOrigine, periodeFinale)
