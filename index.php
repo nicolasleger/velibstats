@@ -48,6 +48,12 @@ $statusStation = $requete->fetchAll();
         <canvas id="chartBikes" width="1000" height="400"></canvas>
         <i>Ce site n'est pas un site officiel de vélib métropole. Les données utilisées proviennent de <a href="http://www.velib-metropole.fr">www.velib-metropole.fr</a> et appartienne à leur propriétaire. - <a href="https://framagit.org/JonathanMM/velibstats">Site du projet</a></i>
         <h2>Stations</h2>
+        Fitrer : État 
+        <select id="filtreEtat">
+            <option value="toutes">Toutes</option>
+            <option value="ouverte">Ouverte</option>
+            <option value="travaux">En travaux</option>
+        </select>
         <table id="stations">
             <thead>
                 <tr>
@@ -155,7 +161,22 @@ $statusStation = $requete->fetchAll();
             });
 
             $(document).ready( function () {
-                $('#stations').DataTable();
+                var dt = $('#stations').DataTable();
+
+                $("#filtreEtat").change(function() {
+                    var valeur = $("#filtreEtat").val();
+                    switch (valeur) {
+                        case "ouverte":
+                            dt.column(3).search("Ouverte").draw();
+                            break;
+                        case "travaux":
+                            dt.column(3).search("En travaux").draw();
+                            break;
+                        default:
+                            dt.column(3).search("").draw();
+                            break;
+                    }
+                });
             } );
         </script>
     </body>
