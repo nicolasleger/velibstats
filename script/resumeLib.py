@@ -1,4 +1,4 @@
-import urllib.request, json, os, pymysql, datetime
+import pymysql, datetime
 from config import getMysqlConnection
 
 def calculerResume(dateConsoDT, dureeConso):
