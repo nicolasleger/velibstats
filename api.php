@@ -82,7 +82,7 @@ function getDataBikeInstantane($codeStation)
     $nbFreeEdockData = [];
     foreach($statusStation as $statut)
     {
-        $dates[] = $statut['date'];
+        $dates[] = (new DateTime($statut['date']))->format("d/m H\hi");
         $nbBikeData[] = $statut['nbBike'];
         $nbEbikeData[] = $statut['nbEBike'];
         $nbFreeEdockData[] = $statut['nbFreeEDock'];
@@ -157,7 +157,7 @@ function getDataBikeResume($codeStation, $filtre, $periode)
     $nbEBikeRenduData = [];
     foreach($resumeStatusStation as $statut)
     {
-        $datesResume[] = $statut['date'];
+        $datesResume[] = (new DateTime($statut['date']))->format("d/m H\hi");
         $nbBikeMinData[] = $statut['nbBikeMin'];
         $nbBikeMaxData[] = $statut['nbBikeMax'];
         $nbBikeMoyenneData[] = $statut['nbBikeMoyenne'];
