@@ -143,17 +143,55 @@ function voteNon()
 
 function vote(statut)
 {
-    getData('api.php?action=vote&statut='+(statut ? 'oui' : 'non')+'&codeStation='+codeStation).then(function(data) {
-        if(data)
-            alert('Votre vote a été pris en compte');
-    });
+
+    if(localStorage.vote == undefined)
+        localStorage.vote = JSON.stringify({});
+    var vote = JSON.parse(localStorage.vote);
+    if(vote[codeStation] == undefined || ((new Date()) - new Date(vote[codeStation])) > 24*60*60*1000) //Pas plus d'un vote par jour
+    {
+        getData('api.php?action=vote&statut='+(statut ? 'oui' : 'non')+'&codeStation='+codeStation).then(function(data) {
+            if(data)
+            {
+                alert('Votre vote a été pris en compte');
+                if(localStorage.vote == undefined)
+                    localStorage.vote = JSON.stringify({});
+                var vote = JSON.parse(localStorage.vote);
+                vote[codeStation] = new Date();
+                localStorage.vote = JSON.stringify(vote);
+                hideBoutonsVote();
+            } else {
+                alert('Erreur durant le vote');
+            }
+        });
+    } else {
+        hideBoutonsVote();
+    }
+}
+
+function hideBoutonsVote()
+{
+    $("#boutonFonctionneOui").hide();
+    $("#boutonFonctionneNon").hide();
+}
+
+function initBoutonsVote()
+{
+    if(localStorage.vote == undefined)
+    localStorage.vote = JSON.stringify({});
+    var vote = JSON.parse(localStorage.vote);
+    if(vote[codeStation] == undefined || ((new Date()) - new Date(vote[codeStation])) > 24*60*60*1000) //Pas plus d'un vote par jour
+    {
+        $("#boutonFonctionneOui").click(voteOui);
+        $("#boutonFonctionneNon").click(voteNon);
+    } else {
+        hideBoutonsVote();
+    }
 }
 
 $(document).ready( function () {
     $("#dureeGraphiqueSelect").change(changerGraphe);
     $("#typeGraphiqueSelect").change(changerGraphe);
     $("#displayDetails").change(displayDetails);
-    $("#boutonFonctionneOui").click(voteOui);
-    $("#boutonFonctionneNon").click(voteNon);
+    initBoutonsVote();
     changerGraphe();
 });
