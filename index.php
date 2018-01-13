@@ -46,7 +46,8 @@ $statusStation = $requete->fetchAll();
         <i>Dernière mise à jour : <?php echo $conso['date']; ?></i>
         <canvas id="chartNbStations" width="1000" height="400"></canvas>
         <canvas id="chartBikes" width="1000" height="400"></canvas>
-        <i>Ce site n'est pas un site officiel de vélib métropole. Les données utilisées proviennent de <a href="http://www.velib-metropole.fr">www.velib-metropole.fr</a> et appartienne à leur propriétaire. - <a href="https://framagit.org/JonathanMM/velibstats">Site du projet</a></i>
+        <i>Ce site n'est pas un site officiel de vélib métropole. Les données utilisées proviennent de <a href="http://www.velib-metropole.fr">www.velib-metropole.fr</a> et appartienne à leur propriétaire. - <a href="https://framagit.org/JonathanMM/velibstats">Site du projet</a> - 
+        Auteur : JonathanMM (<a href="https://twitter.com/Jonamaths">@Jonamaths</a>)</i>
         <h2>Stations</h2>
         Fitrer : État 
         <select id="filtreEtat">
