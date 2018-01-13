@@ -73,7 +73,7 @@ function getDataBikeInstantane($codeStation)
     FROM status s 
     INNER JOIN statusConso c ON c.id = s.idConso 
     WHERE s.code = '.$codeStation.' AND c.date >= "'.$filtreDate.'" 
-    ORDER BY s.code ASC');
+    ORDER BY c.date ASC');
     $statusStation = $requete->fetchAll();
 
     $dates = [];

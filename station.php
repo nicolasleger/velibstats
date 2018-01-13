@@ -80,6 +80,7 @@ $statusStation = $requete->fetchAll();
             <option value="septJours">Une semaine - Période d'une heure</option>
             <option value="unMois">Un mois - Période de six heures</option>
         </select>
+        <span id="displayDetailsArea"><input type="checkbox" id="displayDetails" /><label for="displayDetails">Afficher les détails</label></span>
         <canvas id="chartBikes" width="1000" height="400"></canvas>
         <canvas id="chartBornesLibres" width="1000" height="400"></canvas>
         <i>Ce site n'est pas un site officiel de vélib métropole. Les données utilisées proviennent de <a href="http://www.velib-metropole.fr">www.velib-metropole.fr</a> et appartienne à leur propriétaire. - <a href="https://framagit.org/JonathanMM/velibstats">Site du projet</a></i>
