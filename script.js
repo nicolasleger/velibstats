@@ -131,9 +131,29 @@ function displayDetails()
         updateGraph();
 }
 
+function voteOui()
+{
+    vote(true);
+}
+
+function voteNon()
+{
+    vote(false);
+}
+
+function vote(statut)
+{
+    getData('api.php?action=vote&statut='+(statut ? 'oui' : 'non')+'&codeStation='+codeStation).then(function(data) {
+        if(data)
+            alert('Votre vote a été pris en compte');
+    });
+}
+
 $(document).ready( function () {
     $("#dureeGraphiqueSelect").change(changerGraphe);
     $("#typeGraphiqueSelect").change(changerGraphe);
     $("#displayDetails").change(displayDetails);
+    $("#boutonFonctionneOui").click(voteOui);
+    $("#boutonFonctionneNon").click(voteNon);
     changerGraphe();
 });

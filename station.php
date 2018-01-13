@@ -34,6 +34,22 @@ INNER JOIN statusConso c ON c.id = s.idConso
 WHERE s.code = '.$code.' AND c.date >= "'.$filtreDate.'" 
 ORDER BY s.code ASC');
 $statusStation = $requete->fetchAll();
+
+//Filtre semaine
+$hier = new DateTime("-1week");
+$filtreSemaine = $hier->format('Y-m-d H:i:s');
+
+//Signalements
+$requete = $pdo->query('SELECT * 
+FROM signalement 
+WHERE code = '.$code.' AND dateSignalement >= "'.$filtreSemaine.'" 
+ORDER BY dateSignalement DESC');
+$signalements = $requete->fetchAll();
+$resumeSignalement = array(true => 0, false => 0);
+foreach($signalements as $sign)
+{
+    $resumeSignalement[$sign['estFonctionnel'] == 1]++;
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -68,6 +84,22 @@ $statusStation = $requete->fetchAll();
             <li>Nom : <?php echo $station['name']; ?></li>
             <li>Date d'ouverture : <?php echo $station['dateOuverture']; ?></li>
             <li>Adresse la plus proche (selon <a href="https://adresse.data.gouv.fr/">BAN</a>) : <?php echo $station['adresse']; ?></li>
+            <li>Signalement des utilisateurs sur l'état de la station (dernière semaine) : 
+            <?php
+            if(array_sum($resumeSignalement) == 0)
+                echo 'Aucun';
+            else
+            {
+                if($resumeSignalement[true] > 0)
+                    echo 'Fonctionne = '.$resumeSignalement[true].'; ';
+                if($resumeSignalement[false] > 0)
+                    echo 'Ne fonctionne pas = '.$resumeSignalement[false].'; ';
+                echo 'Dernier signalement : '.($signalements[0]['estFonctionnel'] == 1 ? 'Fonctionne' : 'Ne fonctionne pas').' à '.(new DateTime($signalements[0]['dateSignalement']))->format('d/m H:i');
+            }
+            ?>
+            <button id="boutonFonctionneOui">La station fonctionne</button>
+            <button id="boutonFonctionneNon">La station ne fonctionne pas</button>
+            </li>
         </ul>
         <h2>Graphique</h2>
         <select id="typeGraphiqueSelect">

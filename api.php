@@ -54,6 +54,10 @@ switch($_GET['action'])
         echo json_encode(getFreeDockResume($codeStation, "-1month", 360));
         exit();
         break;
+    case 'vote':
+        echo json_encode(compterVote($codeStation, $_GET['statut']));
+        exit();
+        break;
 }
 
 function getBikeInstantane($codeStation)
@@ -403,5 +407,21 @@ function getDataFreeDockResume($codeStation, $filtre, $periode)
             )
         )
             );
+}
+
+function compterVote($codeStation, $statut)
+{
+    global $pdo;
+
+    $vote = null;
+    if($statut == 'oui')
+        $vote = 1;
+    elseif($statut == 'non')
+        $vote = 0;
+    else
+        return false;
+    
+    $pdo->exec('INSERT INTO signalement (code, estFonctionnel) VALUES ('.$codeStation.', '.$vote.')');
+    return true;
 }
 ?>

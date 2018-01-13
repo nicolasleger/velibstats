@@ -105,6 +105,18 @@ CREATE TABLE `statusConso` (
   `nbFreeEDock` int(11) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED;
 
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `signalement`
+--
+CREATE TABLE `signalement` (
+  `id` int(11) NOT NULL,
+  `code` int(11) NOT NULL,
+  `dateSignalement` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `estFonctionnel` tinyint(1) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
 --
 -- Index pour les tables exportées
 --
@@ -137,6 +149,12 @@ ALTER TABLE `statusConso`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Index pour la table `signalement`
+--
+ALTER TABLE `signalement`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- AUTO_INCREMENT pour les tables exportées
 --
 
@@ -155,6 +173,13 @@ ALTER TABLE `status`
 --
 ALTER TABLE `statusConso`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT pour la table `signalement`
+--
+ALTER TABLE `signalement`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
