@@ -1,4 +1,4 @@
-from resumeLib import debuterCalculResume, debuterCalculResumeOfResume
+from resumeLib import debuterCalculResume, debuterCalculResumeConso, debuterCalculResumeOfResume, debuterCalculResumeOfResumeConso
 import pymysql, datetime
 from config import getMysqlConnection
 
@@ -25,8 +25,10 @@ for periode in periodes:
         print("Période " + str(periode)+'; date = '+str(dateCourante))
         if periode == 5:
             debuterCalculResume(periode, dateCourante)
+            debuterCalculResumeConso(periode, dateCourante)
         else:
             debuterCalculResumeOfResume(periodePrecedente, periode, dateCourante)
+            debuterCalculResumeOfResumeConso(periodePrecedente, periode, dateCourante)
         dateCourante = dateCourante + datetime.timedelta(minutes=periode)
     periodePrecedente = periode
     print("-> Fin période "+ str(periode))

@@ -1,24 +1,41 @@
 -- phpMyAdmin SQL Dump
--- version 4.6.6deb4
+-- version 4.6.5.2
 -- https://www.phpmyadmin.net/
 --
--- Client :  localhost:3306
--- Généré le :  Jeu 11 Janvier 2018 à 07:58
--- Version du serveur :  10.1.25-MariaDB-
--- Version de PHP :  7.0.22-0ubuntu0.17.04.1
+-- Client :  localhost
+-- Généré le :  Sam 13 Janvier 2018 à 20:47
+-- Version du serveur :  10.1.21-MariaDB
+-- Version de PHP :  7.0.15
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
 
+--
+-- Base de données :  `velib`
+--
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
+-- --------------------------------------------------------
 
 --
--- Base de données :  `c6velib`
+-- Structure de la table `resumeConso`
 --
+
+CREATE TABLE `resumeConso` (
+  `id` int(11) NOT NULL,
+  `date` datetime NOT NULL,
+  `duree` int(4) NOT NULL,
+  `nbStation` int(11) NOT NULL,
+  `nbBikeMin` int(11) NOT NULL,
+  `nbBikeMax` int(11) NOT NULL,
+  `nbBikeMoyenne` int(11) NOT NULL,
+  `nbEBikeMin` int(11) NOT NULL,
+  `nbEBikeMax` int(11) NOT NULL,
+  `nbEBikeMoyenne` int(11) NOT NULL,
+  `nbFreeEDockMin` int(11) NOT NULL,
+  `nbFreeEDockMax` int(11) NOT NULL,
+  `nbFreeEDockMoyenne` int(11) NOT NULL,
+  `nbEDock` int(11) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -53,6 +70,19 @@ CREATE TABLE `resumeStatus` (
   `nbEBikeOverflowMoyenne` decimal(5,2) NOT NULL,
   `maxBikeOverflow` int(3) NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `signalement`
+--
+
+CREATE TABLE `signalement` (
+  `id` int(11) NOT NULL,
+  `code` int(11) NOT NULL,
+  `dateSignalement` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `estFonctionnel` tinyint(1) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -106,21 +136,15 @@ CREATE TABLE `statusConso` (
   `nbEDock` int(11) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED;
 
--- --------------------------------------------------------
-
---
--- Structure de la table `signalement`
---
-CREATE TABLE `signalement` (
-  `id` int(11) NOT NULL,
-  `code` int(11) NOT NULL,
-  `dateSignalement` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `estFonctionnel` tinyint(1) NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
 --
 -- Index pour les tables exportées
 --
+
+--
+-- Index pour la table `resumeConso`
+--
+ALTER TABLE `resumeConso`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Index pour la table `resumeStatus`
@@ -129,6 +153,12 @@ ALTER TABLE `resumeStatus`
   ADD PRIMARY KEY (`id`),
   ADD KEY `date` (`date`),
   ADD KEY `duree` (`duree`);
+
+--
+-- Index pour la table `signalement`
+--
+ALTER TABLE `signalement`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Index pour la table `stations`
@@ -150,19 +180,23 @@ ALTER TABLE `statusConso`
   ADD PRIMARY KEY (`id`);
 
 --
--- Index pour la table `signalement`
---
-ALTER TABLE `signalement`
-  ADD PRIMARY KEY (`id`);
-
---
 -- AUTO_INCREMENT pour les tables exportées
 --
 
 --
+-- AUTO_INCREMENT pour la table `resumeConso`
+--
+ALTER TABLE `resumeConso`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+--
 -- AUTO_INCREMENT pour la table `resumeStatus`
 --
 ALTER TABLE `resumeStatus`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT pour la table `signalement`
+--
+ALTER TABLE `signalement`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT pour la table `status`
@@ -174,13 +208,3 @@ ALTER TABLE `status`
 --
 ALTER TABLE `statusConso`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT pour la table `signalement`
---
-ALTER TABLE `signalement`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

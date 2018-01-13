@@ -160,3 +160,117 @@ def debuterCalculResumeOfResume(periodeOrigine, periodeFinale, dateCourante = da
     debutPeriodeMinute = (dateConsoDT.hour * 60 + dateConsoDT.minute) % periodeFinale
     dateConsoDT = dateConsoDT.replace(microsecond = 0, second = 0) - datetime.timedelta(minutes=debutPeriodeMinute)
     calculerResumeOfResume(dateConsoDT, periodeOrigine, periodeFinale)
+
+#StatutConso
+def calculerResumeConso(dateConsoDT, dureeConso):
+    dateConso = dateConsoDT.strftime("%Y-%m-%d %H:%M:%S")
+    minuteAvant = dateConsoDT - datetime.timedelta(minutes=1)
+    dateConsoAvant = minuteAvant.strftime("%Y-%m-%d %H:%M:%S")
+    finConso = dateConsoDT + datetime.timedelta(minutes=dureeConso)
+    dateConsoFin = finConso.strftime("%Y-%m-%d %H:%M:%S")
+
+    proprietes = ['nbStation', 'nbBike', 'nbEBike', 'nbFreeEDock', 'nbEDock']
+    mysql = getMysqlConnection()
+
+    requete = mysql.cursor()
+    requete.execute("SELECT "+', '.join(proprietes)+" \
+    FROM statusConso \
+    WHERE (`date` >= '"+dateConso+"' AND `date` < '"+dateConsoFin+"') \
+    ORDER BY id ASC")
+    statusConso = requete.fetchall()
+    bikeList = {}
+    for row in statusConso:
+        for i, cle in enumerate(proprietes):
+            if not row[i] is None:
+                valeurProp = int(row[i])
+                if cle in ['nbStation', 'nbEDock']:
+                    if not cle in bikeList:
+                        bikeList[cle] = valeurProp
+                    else:
+                        bikeList[cle] = max(bikeList[cle], valeurProp)
+                else:
+                    if not cle in bikeList:
+                        bikeList[cle] = {'data': [], 'min': valeurProp, 'max': valeurProp}
+                    else:
+                        bikeList[cle]['max'] = max(bikeList[cle]['max'], valeurProp)
+                        bikeList[cle]['min'] = min(bikeList[cle]['min'], valeurProp)
+
+                    bikeList[cle]['data'].append(valeurProp)
+
+    for cle in bikeList:
+        info = bikeList[cle]
+        if type(info) is dict:
+            data = info['data']
+            bikeList[cle]['moyenne'] = sum(data) / max(len(data), 1)
+
+    if len(bikeList) > 0:
+        valeurs = bikeList
+        requete = mysql.cursor()
+        #nbEDock peut être null
+        nbEDock = 0
+        if nbEDock in valeurs:
+            nbEDock = valeurs['nbEDock']
+        requete.execute('INSERT INTO `resumeConso` (`id`, `date`, `duree`, `nbStation`, `nbBikeMin`, `nbBikeMax`, `nbBikeMoyenne`, `nbEBikeMin`, `nbEBikeMax`, `nbEBikeMoyenne`, `nbFreeEDockMin`, `nbFreeEDockMax`, `nbFreeEDockMoyenne`, `nbEDock`) VALUES \
+        (NULL, "'+dateConso+'", '+str(dureeConso)+', '+str(valeurs['nbStation'])+', '+str(valeurs['nbBike']['min'])+', '+str(valeurs['nbBike']['max'])+', '+str(valeurs['nbBike']['moyenne'])+', '+str(valeurs['nbEBike']['min'])+', '+str(valeurs['nbEBike']['max'])+', '+str(valeurs['nbEBike']['moyenne'])+', '+str(valeurs['nbFreeEDock']['min'])+', '+str(valeurs['nbFreeEDock']['max'])+', '+str(valeurs['nbFreeEDock']['moyenne'])+', '+str(nbEDock)+')')
+
+def calculerResumeOfResumeConso(dateConsoDT, dureeConsoOrigine, dureeConsoFinale):
+    dateConso = dateConsoDT.strftime("%Y-%m-%d %H:%M:%S")
+    finConso = dateConsoDT + datetime.timedelta(minutes=dureeConsoFinale)
+    dateConsoFin = finConso.strftime("%Y-%m-%d %H:%M:%S")
+
+    #On récupère les conso
+    proprietes = ['nbStation', 'nbBikeMin', 'nbBikeMax', 'nbBikeMoyenne', 'nbEBikeMin', 'nbEBikeMax', 'nbEBikeMoyenne', 'nbFreeEDockMin', 'nbFreeEDockMax', 'nbFreeEDockMoyenne', 'nbEDock']
+    
+    mysql = getMysqlConnection()
+    requete = mysql.cursor()
+    requete.execute("SELECT "+', '.join(proprietes)+" FROM `resumeConso` WHERE duree = "+str(dureeConsoOrigine)+" and date >= '"+dateConso+"' and date < '"+dateConsoFin+"' order by date")
+    consos = requete.fetchall()
+    precedentCode = None
+    infosCourantes = {}
+    for row in consos:
+        for i, cle in enumerate(proprietes):
+            if cle[-7:] == 'Moyenne':
+                valeurProp = float(row[i])
+            else:
+                valeurProp = int(row[i])
+            
+            if cle in infosCourantes:
+                if cle[-7:] == 'Moyenne':
+                    infosCourantes[cle].append(valeurProp)
+                elif cle[-3:] == 'Min':
+                    infosCourantes[cle] = min(infosCourantes[cle], valeurProp)
+                else:
+                    infosCourantes[cle] = max(infosCourantes[cle], valeurProp)
+            else:
+                if cle[-7:] == 'Moyenne':
+                    infosCourantes[cle] = [valeurProp]
+                else:
+                    infosCourantes[cle] = valeurProp
+
+    #Et on enregistre
+    if infosCourantes != {}:
+        strValeurs = ""
+        for i, cle in enumerate(proprietes):
+            if cle[-7:] == 'Moyenne':
+                data = infosCourantes[cle]
+                moyenne = sum(data) / max(len(data), 1)
+                infosCourantes[cle] = moyenne
+            if i != 0:
+                strValeurs += ', '
+            strValeurs += str(infosCourantes[cle])
+        
+        requete = mysql.cursor()
+        requete.execute('INSERT INTO `resumeConso` (`id`, `date`, `duree`, '+', '.join(proprietes)+') VALUES \
+        (NULL, "'+dateConso+'", '+str(dureeConsoFinale)+', '+strValeurs+')')
+
+def debuterCalculResumeConso(periode, dateCourante = datetime.datetime.now()):
+    dateConsoDT = dateCourante - datetime.timedelta(minutes=periode)
+    debutPeriodeMinute = dateConsoDT.minute % periode
+    dateConsoDT = dateConsoDT.replace(microsecond = 0, second = 0, minute=dateConsoDT.minute - debutPeriodeMinute)
+    calculerResumeConso(dateConsoDT, periode)
+
+def debuterCalculResumeOfResumeConso(periodeOrigine, periodeFinale, dateCourante = datetime.datetime.now()):
+    dateConsoDT = dateCourante - datetime.timedelta(minutes=periodeFinale)
+    debutPeriodeMinute = (dateConsoDT.hour * 60 + dateConsoDT.minute) % periodeFinale
+    dateConsoDT = dateConsoDT.replace(microsecond = 0, second = 0) - datetime.timedelta(minutes=debutPeriodeMinute)
+    calculerResumeOfResumeConso(dateConsoDT, periodeOrigine, periodeFinale)
