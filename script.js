@@ -21,46 +21,59 @@ function getData(url)
 function changerGraphe()
 {
     var choixType = $("#typeGraphiqueSelect").val();
+    if(choixType == '_double')
+        listeType = ['Conso', 'ConsoBike'];
+    else
+        listeType = [choixType];
     var choixPeriode = $("#dureeGraphiqueSelect").val();
-    var choix = 'get' + choixType;
-    switch (choixPeriode) {
-        case "instantanee":
-            $("#displayDetailsArea").hide();
-            displayGraph(choix+"Instantane");
-            break;
-        case "troisHeures":
-            $("#displayDetailsArea").show();
-            displayGraph(choix+"ResumeTroisHeures");
-            break;
-        case "unJour":
-            $("#displayDetailsArea").show();
-            displayGraph(choix+"ResumeUnJour");
-            break;
-        case "septJours":
-            $("#displayDetailsArea").show();
-            displayGraph(choix+"ResumeSeptJours");
-            break;
-        case "unMois":
-            $("#displayDetailsArea").show();
-            displayGraph(choix+"ResumeUnMois");
-            break;
+    for(i in listeType)
+    {
+        var choixType = listeType[i];
+        var choix = 'get' + choixType;
+        switch (choixPeriode) {
+            case "instantanee":
+                $("#displayDetailsArea").hide();
+                displayGraph(choix+"Instantane", choixType);
+                break;
+            case "troisHeures":
+                $("#displayDetailsArea").show();
+                displayGraph(choix+"ResumeTroisHeures", choixType);
+                break;
+            case "unJour":
+                $("#displayDetailsArea").show();
+                displayGraph(choix+"ResumeUnJour", choixType);
+                break;
+            case "septJours":
+                $("#displayDetailsArea").show();
+                displayGraph(choix+"ResumeSeptJours", choixType);
+                break;
+            case "unMois":
+                $("#displayDetailsArea").show();
+                displayGraph(choix+"ResumeUnMois", choixType);
+                break;
+        }
     }
 }
 
-var graphInstance = null;
+var graphInstance = {};
 var graphData = null;
 var graphDataSets = null;
-function displayGraph(actionUrl)
+function displayGraph(actionUrl, choixType)
 {
-    getData('api.php?action='+actionUrl+'&codeStation='+codeStation).then(updateGraph);
+    getData('api.php?action='+actionUrl+'&codeStation='+codeStation).then(function(data)
+    {
+        updateGraph(data, choixType);
+    });
 }
 
-function getDisplayData()
+function getDisplayData(displayBike, displayInstantanne)
 {
     var dataDisplay = graphData;
     var displayDetails = $("#displayDetails").prop('checked');
-    var displayInstantanne = $("#dureeGraphiqueSelect").val() == 'instantanee';
-    var displayBike = $("#typeGraphiqueSelect").val() == 'Bike';
+    if(displayInstantanne == undefined)
+        displayInstantanne = $("#dureeGraphiqueSelect").val() == 'instantanee';
+    if(displayBike == undefined)
+        displayBike = $("#typeGraphiqueSelect").val() == 'Bike';
     if(displayInstantanne || !displayDetails)
     {
         if(displayBike) //Vélos
@@ -112,17 +125,43 @@ function getDisplayData()
     return dataDisplay;
 }
 
-function updateGraph(data)
+function updateGraph(data, choixType)
 {
-    if(graphInstance != null)
-        graphInstance.destroy();
-    var chartBikes = $("#chartBikes")[0].getContext('2d');
+    if(graphInstance != null && choixType != 'ConsoBike')
+    {
+        for(i in graphInstance)
+        {
+            var instance = graphInstance[i];
+            instance.destroy();
+        }
+        graphInstance = {};
+    }
+    var idChart = "#chartBikes";
+    var isBike;
+    var isInstantanne;
+    if(choixType == 'Conso')
+    {
+        idChart = '#chartNbStations';
+        isBike = false;
+        isInstantanne = $("#dureeGraphiqueSelect").val() == 'instantanee';
+    } else if(choixType == 'ConsoBike')
+    {
+        isBike = true;
+        isInstantanne = true;
+    }
+    else
+    {
+        isBike = $("#typeGraphiqueSelect").val() == 'Bike';
+        isInstantanne = $("#dureeGraphiqueSelect").val() == 'instantanee';
+    }
+    var chartBikes = $(idChart)[0].getContext('2d');
     if(data != undefined)
     {
         graphData = data;
         graphDataSets = data.data.datasets;
     }
-    graphInstance = new Chart(chartBikes, getDisplayData());
+
+    graphInstance[choixType] = new Chart(chartBikes, getDisplayData(isBike, isInstantanne));
 }
 
 function displayDetails()

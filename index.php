@@ -28,6 +28,8 @@ else
         <link rel="stylesheet" type="text/css" href="datatables.min.css"/>
  
         <script type="text/javascript" src="datatables.min.js"></script>
+        <script type="text/javascript" src="script.js"></script>
+
         <style type="text/css">
         table, tr, td, th
         {
@@ -49,7 +51,17 @@ else
             <li>Nombre de bornes libres : <?php echo $conso['nbFreeEDock']; ?></li>
             <li>Nombre de bornes total : <?php echo $conso['nbEDock']; ?></li>
         </ul>
-        <i>Dernière mise à jour : <?php echo $conso['date']; ?></i>
+        <i>Dernière mise à jour : <?php echo $conso['date']; ?></i><br />
+        <select id="typeGraphiqueSelect" style="display: none">
+            <option value="_double">Conso</option>
+        </select>
+        <select id="dureeGraphiqueSelect">
+            <option value="instantanee">Une heure - Instantanée</option>
+            <option value="troisHeures">Trois heures - Période de 5 minutes</option>
+            <option value="unJour">Un jour - Période de 15 minutes</option>
+            <option value="septJours" selected>Une semaine - Période d'une heure</option>
+            <option value="unMois">Un mois - Période de six heures</option>
+        </select>
         <canvas id="chartNbStations" width="1000" height="400"></canvas>
         <canvas id="chartBikes" width="1000" height="400"></canvas>
         <i>Ce site n'est pas un site officiel de vélib métropole. Les données utilisées proviennent de <a href="http://www.velib-metropole.fr">www.velib-metropole.fr</a> et appartienne à leur propriétaire. - <a href="https://framagit.org/JonathanMM/velibstats">Site du projet</a> - 
@@ -91,82 +103,9 @@ else
             </tbody>
         </table>
         <script type="text/javascript">
-        <?php
-        //On définit les points
-        $requete = $pdo->query('SELECT * FROM `statusConso` Where date >= "'.$filtreDate.'" Order by id asc');
-        $allConso = $requete->fetchAll();
-        $dates = [];
-        $nbStationsData = [];
-        $nbBikeData = [];
-        $nbEbikeData = [];
-        $nbFreeEdockData = [];
-        foreach($allConso as $i => $c)
-        {
-            if($c['nbStation'] > 0)
-            {
-                $dates[] = $c['date'];
-                $nbStationsData[] = $c['nbStation'];
-                $nbBikeData[] = $c['nbBike'];
-                $nbEbikeData[] = $c['nbEbike'];
-                $nbFreeEdockData[] = $c['nbFreeEDock'];
-            }
-        }
-        echo 'var datesData = ["'.implode('","', $dates).'"];';
-        echo 'var nbStationsData = ['.implode(',', $nbStationsData).'];';
-        echo 'var nbBikeData = ['.implode(',', $nbBikeData).'];';
-        echo 'var nbEbikeData = ['.implode(',', $nbEbikeData).'];';
-        echo 'var nbFreeEdockData = ['.implode(',', $nbFreeEdockData).'];';
-        ?>
+        var codeStation = -1;
         </script>
         <script type="application/javascript">
-            var chartNbStations = document.getElementById("chartNbStations").getContext('2d');
-            var data = {
-                labels: datesData,
-                datasets: [
-                    {
-                        backgroundColor : "rgba(173,0,130,0.5)",
-                        data : nbStationsData,
-                        label: 'Nombre de stations'
-                    }
-                ]
-            };
-            var options = {
-                responsive: false,
-                scales: {
-                    yAxes: [{
-                        stacked: true
-                    }]
-                }
-            };
-            new Chart(chartNbStations, {
-                type: 'line',
-                data: data,
-                options: options
-            });
-
-            var chartBikes = document.getElementById("chartBikes").getContext('2d');
-            var dataBike = {
-                labels: datesData,
-                datasets: [
-                    {
-                        backgroundColor : "rgba(104,221,46,0.5)",
-                        data : nbBikeData,
-                        label: 'Vélos mécaniques'
-                    },
-                    {
-                        backgroundColor : "rgba(76, 213, 233, 0.5)",
-                        data : nbEbikeData,
-                        label: 'Vélos électriques'
-                    }
-                ]
-            };
-
-            new Chart(chartBikes, {
-                type: 'line',
-                data: dataBike,
-                options: options
-            });
-
             $(document).ready( function () {
                 var dt = $('#stations').DataTable();
 

@@ -58,6 +58,46 @@ switch($_GET['action'])
         echo json_encode(compterVote($codeStation, $_GET['statut']));
         exit();
         break;
+    case 'getConsoInstantane':
+        echo json_encode(getConsoInstantane());
+        exit();
+        break;
+    case 'getConsoResumeTroisHeures':
+        echo json_encode(getConsoResume("-3hours", 5));
+        exit();
+        break;
+    case 'getConsoResumeUnJour':
+        echo json_encode(getConsoResume("-1day", 15));
+        exit();
+        break;
+    case 'getConsoResumeSeptJours':
+        echo json_encode(getConsoResume("-7days", 60));
+        exit();
+        break;
+    case 'getConsoResumeUnMois':
+        echo json_encode(getConsoResume("-1month", 360));
+        exit();
+        break;
+    case 'getConsoBikeInstantane':
+        echo json_encode(getConsoBikeInstantane());
+        exit();
+        break;
+    case 'getConsoBikeResumeTroisHeures':
+        echo json_encode(getConsoBikeResume("-3hours", 5));
+        exit();
+        break;
+    case 'getConsoBikeResumeUnJour':
+        echo json_encode(getConsoBikeResume("-1day", 15));
+        exit();
+        break;
+    case 'getConsoBikeResumeSeptJours':
+        echo json_encode(getConsoBikeResume("-7days", 60));
+        exit();
+        break;
+    case 'getConsoBikeResumeUnMois':
+        echo json_encode(getConsoBikeResume("-1month", 360));
+        exit();
+        break;
 }
 
 function getBikeInstantane($codeStation)
@@ -423,5 +463,256 @@ function compterVote($codeStation, $statut)
     
     $pdo->exec('INSERT INTO signalement (code, estFonctionnel) VALUES ('.$codeStation.', '.$vote.')');
     return true;
+}
+
+function getConsoInstantane()
+{
+    $data = getDataConsoInstantane();
+
+    $dataReturn = array(
+        'labels' => $data['labels'],
+        'datasets' => $data['datasets']
+    );
+        
+    $options = 
+        array(
+            'responsive' => false,
+            'scales' => array(
+                'yAxes' => array(
+                    array('stacked' => true)
+                )
+            )
+        );
+    return array(
+        'type' => 'line',
+        'data' => $dataReturn,
+        'options' => $options
+    );
+}
+
+function getDataConsoInstantane()
+{
+    global $pdo;
+
+    //Filtre 1 heure
+    $hier = new DateTime("-1hour");
+    $filtreDate = $hier->format('Y-m-d H:i:s');
+
+    $requete = $pdo->query('SELECT * FROM `statusConso` Where date >= "'.$filtreDate.'" Order by id asc');
+    $allConso = $requete->fetchAll();
+    $dates = [];
+    $nbStationsData = [];
+    foreach($allConso as $i => $c)
+    {
+        if($c['nbStation'] > 0)
+        {
+            $dates[] = (new DateTime($c['date']))->format("d/m H\hi");
+            $nbStationsData[] = $c['nbStation'];
+        }
+    }
+
+    return array(
+        'labels' => $dates,
+        'datasets' => array(
+            array(
+                'label' => 'Nombre de stations',
+                'backgroundColor' => 'rgba(173,0,130,0.5)',
+                'data' => $nbStationsData
+            )
+        )
+            );
+}
+
+function getConsoBikeInstantane()
+{
+    $data = getDataConsoBikeInstantane();
+
+    $dataReturn = array(
+        'labels' => $data['labels'],
+        'datasets' => $data['datasets']
+    );
+        
+    $options = 
+        array(
+            'responsive' => false,
+            'scales' => array(
+                'yAxes' => array(
+                    array('stacked' => true)
+                )
+            )
+        );
+    return array(
+        'type' => 'line',
+        'data' => $dataReturn,
+        'options' => $options
+    );
+}
+
+function getDataConsoBikeInstantane()
+{
+    global $pdo;
+
+    //Filtre 1 heure
+    $hier = new DateTime("-1hour");
+    $filtreDate = $hier->format('Y-m-d H:i:s');
+
+    $requete = $pdo->query('SELECT * FROM `statusConso` Where date >= "'.$filtreDate.'" Order by id asc');
+    $allConso = $requete->fetchAll();
+    $dates = [];
+    $nbBikeData = [];
+    $nbEbikeData = [];
+    foreach($allConso as $i => $c)
+    {
+        if($c['nbStation'] > 0)
+        {
+            $dates[] = (new DateTime($c['date']))->format("d/m H\hi");
+            $nbBikeData[] = $c['nbBike'];
+            $nbEbikeData[] = $c['nbEbike'];
+        }
+    }
+
+    return array(
+        'labels' => $dates,
+        'datasets' => array(
+            array(
+                'label' => 'Vélos mécaniques',
+                'backgroundColor' => 'rgba(104,221,46,0.5)',
+                'data' => $nbBikeData
+            ),
+            array(
+                'label' => 'Vélos électriques',
+                'backgroundColor' => 'rgba(76, 213, 233, 0.5)',
+                'data' => $nbEbikeData
+            )
+        )
+            );
+}
+
+function getConsoResume($filtreDate, $periode)
+{
+    $data = getDataConsoResume($filtreDate, $periode);
+
+    $dataReturn = array(
+        'labels' => $data['labels'],
+        'datasets' => $data['datasets']
+    );
+        
+    $options = 
+        array(
+            'responsive' => false,
+            'scales' => array(
+                'yAxes' => array(
+                    array('stacked' => false)
+                )
+            )
+        );
+    return array(
+        'type' => 'line',
+        'data' => $dataReturn,
+        'options' => $options
+    );
+}
+
+function getDataConsoResume($filtre, $periode)
+{
+    global $pdo;
+
+    //Filtre date
+    $date = new DateTime($filtre);
+    $filtreDate = $date->format('Y-m-d H:i:s');
+
+    $requete = $pdo->query('SELECT *
+    FROM resumeConso
+    WHERE `date` >= "'.$filtreDate.'" AND duree = '.$periode.'
+    ORDER BY date ASC');
+    $resumeStatusStation = $requete->fetchAll();
+
+    $datesResume = [];
+    $nbStationsData = [];
+    foreach($resumeStatusStation as $statut)
+    {
+        $datesResume[] = (new DateTime($statut['date']))->format("d/m H\hi");
+        $nbStationsData[] = $statut['nbStation'];
+    }
+
+    return array(
+        'labels' => $datesResume,
+        'datasets' => array(
+            array(
+                'label' => 'Nombre de stations',
+                'backgroundColor' => 'rgba(173,0,130,0.5)',
+                'data' => $nbStationsData
+            )
+        )
+            );
+}
+
+function getConsoBikeResume($filtreDate, $periode)
+{
+    $data = getDataConsoBikeResume($filtreDate, $periode);
+
+    $dataReturn = array(
+        'labels' => $data['labels'],
+        'datasets' => $data['datasets']
+    );
+        
+    $options = 
+        array(
+            'responsive' => false,
+            'scales' => array(
+                'yAxes' => array(
+                    array('stacked' => false)
+                )
+            )
+        );
+    return array(
+        'type' => 'line',
+        'data' => $dataReturn,
+        'options' => $options
+    );
+}
+
+function getDataConsoBikeResume($filtre, $periode)
+{
+    global $pdo;
+
+    //Filtre date
+    $date = new DateTime($filtre);
+    $filtreDate = $date->format('Y-m-d H:i:s');
+
+    $requete = $pdo->query('SELECT *
+    FROM resumeConso
+    WHERE `date` >= "'.$filtreDate.'" AND duree = '.$periode.'
+    ORDER BY date ASC');
+    $resumeStatusStation = $requete->fetchAll();
+
+    $datesResume = [];
+    $nbBikeData = [];
+    $nbEbikeData = [];
+    foreach($resumeStatusStation as $i => $c)
+    {
+        if($c['nbStation'] > 0)
+        {
+            $dates[] = (new DateTime($c['date']))->format("d/m H\hi");
+            $nbBikeData[] = $c['nbBikeMoyenne'];
+            $nbEbikeData[] = $c['nbEBikeMoyenne'];
+        }
+    }
+
+    return array(
+        'labels' => $datesResume,
+        'datasets' => array(
+            array(
+                'label' => 'Vélos mécaniques',
+                'backgroundColor' => 'rgba(104,221,46,0.5)',
+                'data' => $nbBikeData
+            ),
+            array(
+                'label' => 'Vélos électriques',
+                'backgroundColor' => 'rgba(76, 213, 233, 0.5)',
+                'data' => $nbEbikeData
+            )
+        )
+            );
 }
 ?>
