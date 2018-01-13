@@ -18,29 +18,31 @@ function getData(url)
     );
 }
 
-function changerDateGraphe()
+function changerGraphe()
 {
-    var choix = $("#dureeGraphiqueSelect").val();
-    switch (choix) {
+    var choixType = $("#typeGraphiqueSelect").val();
+    var choixPeriode = $("#dureeGraphiqueSelect").val();
+    var choix = 'get' + choixType;
+    switch (choixPeriode) {
         case "instantanee":
             $("#displayDetailsArea").hide();
-            displayGraph("getBikeInstantane");
+            displayGraph(choix+"Instantane");
             break;
         case "troisHeures":
             $("#displayDetailsArea").show();
-            displayGraph("getBikeResumeTroisHeures");
+            displayGraph(choix+"ResumeTroisHeures");
             break;
         case "unJour":
             $("#displayDetailsArea").show();
-            displayGraph("getBikeResumeUnJour");
+            displayGraph(choix+"ResumeUnJour");
             break;
         case "septJours":
             $("#displayDetailsArea").show();
-            displayGraph("getBikeResumeSeptJours");
+            displayGraph(choix+"ResumeSeptJours");
             break;
         case "unMois":
             $("#displayDetailsArea").show();
-            displayGraph("getBikeResumeUnMois");
+            displayGraph(choix+"ResumeUnMois");
             break;
     }
 }
@@ -57,21 +59,38 @@ function getDisplayData()
 {
     var dataDisplay = graphData;
     var displayDetails = $("#displayDetails").prop('checked');
-    if(!displayDetails && graphDataSets.length > 2)
+    var displayInstantanne = $("#dureeGraphiqueSelect").val() == 'instantanee';
+    var displayBike = $("#typeGraphiqueSelect").val() == 'Bike';
+    if(displayInstantanne || !displayDetails)
     {
-        dataDisplay.data.datasets = [graphDataSets[0], graphDataSets[5]];
-        //On ajuste les couleurs des vélos mécaniques
-        dataDisplay.data.datasets[0].backgroundColor = 'rgba(104,221,46,0.5)';
-        dataDisplay.data.datasets[0].fill = true;
-        delete dataDisplay.data.datasets[0].borderColor;
-        //Et électriques
-        dataDisplay.data.datasets[1].backgroundColor = 'rgba(76, 213, 233,0.5)';
-        dataDisplay.data.datasets[1].fill = true;
-        delete dataDisplay.data.datasets[1].borderColor;
-        dataDisplay.options.scales.yAxes[0].stacked = true;
+        if(displayBike) //Vélos
+        {
+            if(displayInstantanne)
+                dataDisplay.data.datasets = graphDataSets;
+            else
+                dataDisplay.data.datasets = [graphDataSets[0], graphDataSets[5]];
+            //On ajuste les couleurs des vélos mécaniques
+            dataDisplay.data.datasets[0].backgroundColor = 'rgba(104,221,46,0.5)';
+            dataDisplay.data.datasets[0].fill = true;
+            delete dataDisplay.data.datasets[0].borderColor;
+            //Et électriques
+            dataDisplay.data.datasets[1].backgroundColor = 'rgba(76, 213, 233,0.5)';
+            dataDisplay.data.datasets[1].fill = true;
+            delete dataDisplay.data.datasets[1].borderColor;
+            dataDisplay.options.scales.yAxes[0].stacked = true;
+        }
+        else //Bornes
+        {
+            dataDisplay.data.datasets = [graphDataSets[0]];
+            //On ajuste les couleurs
+            dataDisplay.data.datasets[0].backgroundColor = 'rgba(173,0,130,0.5)';
+            dataDisplay.data.datasets[0].fill = true;
+            dataDisplay.options.scales.yAxes[0].stacked = true;
+            delete dataDisplay.data.datasets[0].borderColor;
+        }
     } else {
         dataDisplay.data.datasets = graphDataSets;
-        if(graphDataSets.length > 2)
+        if(displayBike) // Vélos
         {
             //On ajuste les couleurs des vélos mécaniques
             dataDisplay.data.datasets[0].borderColor = 'rgba(104,221,46,0.7)';
@@ -81,6 +100,12 @@ function getDisplayData()
             dataDisplay.data.datasets[5].borderColor = 'rgba(76, 213, 233,0.7)';
             dataDisplay.data.datasets[5].fill = false;
             delete dataDisplay.data.datasets[5].backgroundColor;
+            dataDisplay.options.scales.yAxes[0].stacked = false;
+        } else { //Bornes
+            //On ajuste les couleurs
+            dataDisplay.data.datasets[0].borderColor = 'rgba(173,0,130,0.5)';
+            dataDisplay.data.datasets[0].fill = false;
+            delete dataDisplay.data.datasets[0].backgroundColor;
             dataDisplay.options.scales.yAxes[0].stacked = false;
         }
     }
@@ -107,7 +132,8 @@ function displayDetails()
 }
 
 $(document).ready( function () {
-    $("#dureeGraphiqueSelect").change(changerDateGraphe);
+    $("#dureeGraphiqueSelect").change(changerGraphe);
+    $("#typeGraphiqueSelect").change(changerGraphe);
     $("#displayDetails").change(displayDetails);
-    changerDateGraphe();
+    changerGraphe();
 });

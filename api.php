@@ -34,6 +34,26 @@ switch($_GET['action'])
         echo json_encode(getBikeResume($codeStation, "-1month", 360));
         exit();
         break;
+    case 'getFreeDockInstantane':
+        echo json_encode(getFreeDockInstantane($codeStation));
+        exit();
+        break;
+    case 'getFreeDockResumeTroisHeures':
+        echo json_encode(getFreeDockResume($codeStation, "-3hours", 5));
+        exit();
+        break;
+    case 'getFreeDockResumeUnJour':
+        echo json_encode(getFreeDockResume($codeStation, "-1day", 15));
+        exit();
+        break;
+    case 'getFreeDockResumeSeptJours':
+        echo json_encode(getFreeDockResume($codeStation, "-7days", 60));
+        exit();
+        break;
+    case 'getFreeDockResumeUnMois':
+        echo json_encode(getFreeDockResume($codeStation, "-1month", 360));
+        exit();
+        break;
 }
 
 function getBikeInstantane($codeStation)
@@ -69,7 +89,7 @@ function getDataBikeInstantane($codeStation)
     $hier = new DateTime("-1hour");
     $filtreDate = $hier->format('Y-m-d H:i:s');
 
-    $requete = $pdo->query('SELECT c.date, s.nbBike, s.nbEBike, s.nbFreeEDock, s.nbEDock 
+    $requete = $pdo->query('SELECT c.date, s.nbBike, s.nbEBike, s.nbEDock 
     FROM status s 
     INNER JOIN statusConso c ON c.id = s.idConso 
     WHERE s.code = '.$codeStation.' AND c.date >= "'.$filtreDate.'" 
@@ -79,13 +99,11 @@ function getDataBikeInstantane($codeStation)
     $dates = [];
     $nbBikeData = [];
     $nbEbikeData = [];
-    $nbFreeEdockData = [];
     foreach($statusStation as $statut)
     {
         $dates[] = (new DateTime($statut['date']))->format("d/m H\hi");
         $nbBikeData[] = $statut['nbBike'];
         $nbEbikeData[] = $statut['nbEBike'];
-        $nbFreeEdockData[] = $statut['nbFreeEDock'];
     }
 
     return array(
@@ -242,6 +260,146 @@ function getDataBikeResume($codeStation, $filtre, $periode)
                 'label' => 'Vélos électriques (Rendu)',
                 'backgroundColor' => 'rgba(76, 213, 233, 0.5)',
                 'data' => $nbEBikeRenduData
+            )
+        )
+            );
+}
+
+function getFreeDockInstantane($codeStation)
+{
+    $data = getDataFreeDockInstantane($codeStation);
+
+    $dataReturn = array(
+        'labels' => $data['labels'],
+        'datasets' => $data['datasets']
+    );
+        
+    $options = 
+        array(
+            'responsive' => false,
+            'scales' => array(
+                'yAxes' => array(
+                    array('stacked' => true)
+                )
+            )
+        );
+    return array(
+        'type' => 'line',
+        'data' => $dataReturn,
+        'options' => $options
+    );
+}
+
+function getDataFreeDockInstantane($codeStation)
+{
+    global $pdo;
+
+    //Filtre 1 heure
+    $hier = new DateTime("-1hour");
+    $filtreDate = $hier->format('Y-m-d H:i:s');
+
+    $requete = $pdo->query('SELECT c.date, s.nbFreeEDock, s.nbEDock 
+    FROM status s 
+    INNER JOIN statusConso c ON c.id = s.idConso 
+    WHERE s.code = '.$codeStation.' AND c.date >= "'.$filtreDate.'" 
+    ORDER BY c.date ASC');
+    $statusStation = $requete->fetchAll();
+
+    $dates = [];
+    $nbFreeEdockData = [];
+    foreach($statusStation as $statut)
+    {
+        $dates[] = (new DateTime($statut['date']))->format("d/m H\hi");
+        $nbFreeEdockData[] = $statut['nbFreeEDock'];
+    }
+
+    return array(
+        'labels' => $dates,
+        'datasets' => array(
+            array(
+                'label' => 'Nombre de bornes libres',
+                'backgroundColor' => 'rgba(173,0,130,0.5)',
+                'data' => $nbFreeEdockData
+            )
+        )
+            );
+}
+
+function getFreeDockResume($codeStation, $filtreDate, $periode)
+{
+    $data = getDataFreeDockResume($codeStation, $filtreDate, $periode);
+
+    $dataReturn = array(
+        'labels' => $data['labels'],
+        'datasets' => $data['datasets']
+    );
+        
+    $options = 
+        array(
+            'responsive' => false,
+            'scales' => array(
+                'yAxes' => array(
+                    array('stacked' => false)
+                )
+            )
+        );
+    return array(
+        'type' => 'line',
+        'data' => $dataReturn,
+        'options' => $options
+    );
+}
+
+function getDataFreeDockResume($codeStation, $filtre, $periode)
+{
+    global $pdo;
+
+    //Filtre date
+    $date = new DateTime($filtre);
+    $filtreDate = $date->format('Y-m-d H:i:s');
+
+    $requete = $pdo->query('SELECT `date`, nbFreeEDockMin, nbFreeEDockMax, nbFreeEDockMoyenne
+    FROM resumeStatus 
+    WHERE code = '.$codeStation.' AND `date` >= "'.$filtreDate.'" AND duree = '.$periode.'
+    ORDER BY date ASC');
+    $resumeStatusStation = $requete->fetchAll();
+
+    $datesResume = [];
+    $nbFreeEDockMinData = [];
+    $nbFreeEDockMaxData = [];
+    $nbFreeEDockMoyenneData = [];
+    foreach($resumeStatusStation as $statut)
+    {
+        $datesResume[] = (new DateTime($statut['date']))->format("d/m H\hi");
+        $nbFreeEDockMinData[] = $statut['nbFreeEDockMin'];
+        $nbFreeEDockMaxData[] = $statut['nbFreeEDockMax'];
+        $nbFreeEDockMoyenneData[] = $statut['nbFreeEDockMoyenne'];
+    }
+
+    return array(
+        'labels' => $datesResume,
+        'datasets' => array(
+            array(
+                'label' => 'Nombre de bornes libres (Moyenne)',
+                'borderColor' => 'rgba(173,0,130,0.7)',
+                'fill' => false,
+                'data' => $nbFreeEDockMoyenneData
+            ),
+            array(
+                'label' => 'Nombre de bornes libres (Min)',
+                'borderColor' => 'rgba(173,0,130,0)',
+                'backgroundColor' => 'rgba(173,0,130,0.3)',
+                'fill' => "+1",
+                'borderDash' => [5, 5],
+                'data' => $nbFreeEDockMinData
+            ),
+            array(
+                'label' => 'Nombre de bornes libres (Max)',
+                'borderColor' => 'rgba(173,0,130,0)',
+                'backgroundColor' => 'rgba(173,0,130,0.3)',
+                'fill' => false,
+                'borderDash' => [5, 5],
+                'data' => $nbFreeEDockMaxData
             )
         )
             );

@@ -69,9 +69,10 @@ $statusStation = $requete->fetchAll();
             <li>Date d'ouverture : <?php echo $station['dateOuverture']; ?></li>
             <li>Adresse la plus proche (selon <a href="https://adresse.data.gouv.fr/">BAN</a>) : <?php echo $station['adresse']; ?></li>
         </ul>
-        <h2>Graphiques temps réel</h2>
+        <h2>Graphique</h2>
         <select id="typeGraphiqueSelect">
-            <option value="bike">Vélos disponibles</option>
+            <option value="Bike">Vélos disponibles</option>
+            <option value="FreeDock">Bornes libres</option>
         </select>
         <select id="dureeGraphiqueSelect">
             <option value="instantanee">Une heure - Instantanée</option>
@@ -82,7 +83,6 @@ $statusStation = $requete->fetchAll();
         </select>
         <span id="displayDetailsArea"><input type="checkbox" id="displayDetails" /><label for="displayDetails">Afficher les détails</label></span>
         <canvas id="chartBikes" width="1000" height="400"></canvas>
-        <canvas id="chartBornesLibres" width="1000" height="400"></canvas>
         <i>Ce site n'est pas un site officiel de vélib métropole. Les données utilisées proviennent de <a href="http://www.velib-metropole.fr">www.velib-metropole.fr</a> et appartienne à leur propriétaire. - <a href="https://framagit.org/JonathanMM/velibstats">Site du projet</a></i>
         <h2>Stats</h2>
         <table id="stats">
@@ -97,8 +97,6 @@ $statusStation = $requete->fetchAll();
             <tbody>
                 <?php
                 //On définie les points pour les graphs
-                $dates = [];
-                $nbFreeEdockData = [];
                 foreach($statusStation as $statut)
                 {
                     echo '<tr>';
@@ -107,9 +105,6 @@ $statusStation = $requete->fetchAll();
                     echo '<td>'.$statut['nbEBike'].'</td>';
                     echo '<td>'.$statut['nbFreeEDock'].'/'.$statut['nbEDock'].'</td>';
                     echo '</tr>';
-
-                    $dates[] = $statut['date'];
-                    $nbFreeEdockData[] = $statut['nbFreeEDock'];
                 }
                 ?>
             </tbody>
@@ -117,36 +112,9 @@ $statusStation = $requete->fetchAll();
         <script type="text/javascript">
         <?php
         echo 'var codeStation = '.$code.';'."\n";
-        echo 'var datesData = ["'.implode('","', $dates).'"];'."\n";
-        echo 'var nbFreeEdockData = ['.implode(',', $nbFreeEdockData).'];'."\n";
         ?>
         </script>
         <script type="application/javascript">
-            var options = {
-                responsive: false,
-                scales: {
-                    yAxes: [{
-                        stacked: true
-                    }]
-                }
-            };
-            var chartBornesLibres = document.getElementById("chartBornesLibres").getContext('2d');
-            var data = {
-                labels: datesData,
-                datasets: [
-                    {
-                        backgroundColor : "rgba(173,0,130,0.5)",
-                        data : nbFreeEdockData,
-                        label: 'Nombre de bornes libres'
-                    }
-                ]
-            };
-            new Chart(chartBornesLibres, {
-                type: 'line',
-                data: data,
-                options: options
-            });
-
             $(document).ready( function () {
                 $('#stats').DataTable({
                     language: {
