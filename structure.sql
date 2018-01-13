@@ -102,7 +102,8 @@ CREATE TABLE `statusConso` (
   `nbStation` int(11) DEFAULT NULL,
   `nbBike` int(11) DEFAULT NULL,
   `nbEbike` int(11) DEFAULT NULL,
-  `nbFreeEDock` int(11) DEFAULT NULL
+  `nbFreeEDock` int(11) DEFAULT NULL,
+  `nbEDock` int(11) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED;
 
 -- --------------------------------------------------------

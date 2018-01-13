@@ -17,6 +17,7 @@ def getAllStation():
     nbTotalBike = 0
     nbTotalEBike = 0
     nbTotalFreeEDock = 0
+    nbTotalEDock = 0
 
     #On créer une conso pour avoir son id
     requete = mysql.cursor()
@@ -60,7 +61,8 @@ def getAllStation():
             #On ajoute a la conso
             nbTotalBike += int(etatStation['nbBike'])
             nbTotalEBike += int(etatStation['nbEbike'])
-            nbTotalFreeEDock += int(etatStation['nbFreeEDock'])
+            nbTotalFreeEDock += int(etatStation['nbFreeDock'])+int(etatStation['nbFreeEDock'])
+            nbTotalEDock += int(etatStation['nbDock'])+int(etatStation['nbEDock'])
             if infoStation['state'] == "Operative":
                 nbStationsOuvertes += 1
     os.remove(tmpFileName)
@@ -70,7 +72,8 @@ def getAllStation():
     requete.execute('UPDATE statusConso SET nbStation = '+str(nbStationsOuvertes)+', \
     nbBike = '+str(nbTotalBike)+', \
     nbEbike = '+str(nbTotalEBike)+', \
-    nbFreeEDock = '+str(nbTotalFreeEDock)+' \
+    nbFreeEDock = '+str(nbTotalFreeEDock)+', \
+    nbEDock = '+str(nbTotalEDock)+' \
     WHERE id = '+strIdConso)
 
     mysql.close()
