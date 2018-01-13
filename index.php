@@ -11,8 +11,13 @@ $requete = $pdo->query('SELECT * FROM `statusConso` where nbStation Is not null 
 $conso = $requete->fetch();
 
 //Stations
-$requete = $pdo->query('SELECT * FROM status inner join `stations` on stations.code = status.code WHERE idConso = '.$conso['id'].' order by status.code asc');
-$statusStation = $requete->fetchAll();
+if(is_null($conso['id']))
+    $statusStation = array();
+else
+{
+    $requete = $pdo->query('SELECT * FROM status inner join `stations` on stations.code = status.code WHERE idConso = '.$conso['id'].' order by status.code asc');
+    $statusStation = $requete->fetchAll();
+}
 ?>
 <!DOCTYPE html>
 <html>
