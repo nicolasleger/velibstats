@@ -693,7 +693,7 @@ function getDataConsoBikeResume($filtre, $periode)
     {
         if($c['nbStation'] > 0)
         {
-            $dates[] = (new DateTime($c['date']))->format("d/m H\hi");
+            $datesResume[] = (new DateTime($c['date']))->format("d/m H\hi");
             $nbBikeData[] = $c['nbBikeMoyenne'];
             $nbEbikeData[] = $c['nbEBikeMoyenne'];
         }
