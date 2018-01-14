@@ -124,7 +124,9 @@ else
             }
 
             $(document).ready( function () {
-                var dt = $('#stations').DataTable();
+                var dt = $('#stations').DataTable({
+                    language: dtTraduction
+                });
                 filtreDataTable();
                 $("#filtreEtat").change(filtreDataTable);
             } );
