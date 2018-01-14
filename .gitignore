@@ -5,3 +5,4 @@ config.server.php
 script/__pycache__/
 script/fixStation.py
 *.zip
+*.db
