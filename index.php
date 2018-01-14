@@ -70,7 +70,7 @@ else
         Fitrer : État 
         <select id="filtreEtat">
             <option value="toutes">Toutes</option>
-            <option value="ouverte">Ouverte</option>
+            <option value="ouverte" selected>Ouverte</option>
             <option value="travaux">En travaux</option>
         </select>
         <table id="stations">
@@ -106,23 +106,27 @@ else
         var codeStation = -1;
         </script>
         <script type="application/javascript">
+            function filtreDataTable()
+            {
+                var valeur = $("#filtreEtat").val();
+                var dt = $('#stations').DataTable();
+                switch (valeur) {
+                    case "ouverte":
+                        dt.column(3).search("Ouverte").draw();
+                        break;
+                    case "travaux":
+                        dt.column(3).search("En travaux").draw();
+                        break;
+                    default:
+                        dt.column(3).search("").draw();
+                        break;
+                }
+            }
+
             $(document).ready( function () {
                 var dt = $('#stations').DataTable();
-
-                $("#filtreEtat").change(function() {
-                    var valeur = $("#filtreEtat").val();
-                    switch (valeur) {
-                        case "ouverte":
-                            dt.column(3).search("Ouverte").draw();
-                            break;
-                        case "travaux":
-                            dt.column(3).search("En travaux").draw();
-                            break;
-                        default:
-                            dt.column(3).search("").draw();
-                            break;
-                    }
-                });
+                filtreDataTable();
+                $("#filtreEtat").change(filtreDataTable);
             } );
         </script>
     </body>
