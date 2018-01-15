@@ -1,4 +1,4 @@
-from DumpLib import creerDumpData
+from DumpLib import creerDumpData, creerDumpConso
 import pymysql, datetime
 from config import getMysqlConnection
 
@@ -17,4 +17,5 @@ print("******* Bornes *******")
 while date < dateMax:
     print("Calcul de : " + str(date))
     creerDumpData(date)
+    creerDumpConso(date)
     date = date + datetime.timedelta(days=1)

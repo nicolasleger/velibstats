@@ -104,3 +104,96 @@ def creerDumpData(dateDebut):
 
     #Et on ferme le fichier
     c.close()
+
+def creerDumpConso(dateDebut):
+    dateDebut = dateDebut.replace(microsecond = 0, second = 0, minute=0, hour=0)
+    dateDebutStr = dateDebut.strftime("%Y-%m-%d %H:%M:%S")
+    dateDebutNomFichier = dateDebut.strftime("%Y-%m-%d")
+    dateFin = dateDebut + datetime.timedelta(days=1)
+    dateFinStr = dateFin.strftime("%Y-%m-%d %H:%M:%S")
+
+    nomFichier = '../dump/'+dateDebutNomFichier + '-conso.db'
+    conn = sqlite3.connect(nomFichier)
+
+    mysql = getMysqlConnection()
+
+    #Creation des tables
+    c = conn.cursor()
+    c.execute('''
+    CREATE TABLE `resumeConso` (
+  `id` int(11) NOT NULL,
+  `date` datetime NOT NULL,
+  `duree` int(4) NOT NULL,
+  `nbStation` int(11) NOT NULL,
+  `nbBikeMin` int(11) NOT NULL,
+  `nbBikeMax` int(11) NOT NULL,
+  `nbBikeMoyenne` int(11) NOT NULL,
+  `nbEBikeMin` int(11) NOT NULL,
+  `nbEBikeMax` int(11) NOT NULL,
+  `nbEBikeMoyenne` int(11) NOT NULL,
+  `nbFreeEDockMin` int(11) NOT NULL,
+  `nbFreeEDockMax` int(11) NOT NULL,
+  `nbFreeEDockMoyenne` int(11) NOT NULL,
+  `nbEDock` int(11) NOT NULL
+);
+    ''')
+    c.execute('''
+    CREATE TABLE `resumeStatus` (
+  `id` int(11) NOT NULL,
+  `code` int(11) NOT NULL,
+  `date` datetime NOT NULL,
+  `duree` int(4) NOT NULL,
+  `nbBikeMin` int(3) NOT NULL,
+  `nbBikeMax` int(3) NOT NULL,
+  `nbBikeMoyenne` decimal(5,2) NOT NULL,
+  `nbBikePris` int(3) NOT NULL,
+  `nbBikeRendu` int(3) NOT NULL,
+  `nbEBikeMin` int(3) NOT NULL,
+  `nbEBikeMax` int(3) NOT NULL,
+  `nbEBikeMoyenne` decimal(5,2) NOT NULL,
+  `nbEBikePris` int(3) NOT NULL,
+  `nbEBikeRendu` int(3) NOT NULL,
+  `nbFreeEDockMin` int(3) NOT NULL,
+  `nbFreeEDockMax` int(3) NOT NULL,
+  `nbFreeEDockMoyenne` decimal(5,2) NOT NULL,
+  `nbEDock` int(3) NOT NULL,
+  `nbBikeOverflowMin` int(3) NOT NULL,
+  `nbBikeOverflowMax` int(3) NOT NULL,
+  `nbBikeOverflowMoyenne` decimal(5,2) NOT NULL,
+  `nbEBikeOverflowMin` int(3) NOT NULL,
+  `nbEBikeOverflowMax` int(3) NOT NULL,
+  `nbEBikeOverflowMoyenne` decimal(5,2) NOT NULL,
+  `maxBikeOverflow` int(3) NOT NULL
+);
+    ''')
+    conn.commit()
+
+    #On va récupérer chaque donnée de chaque table
+    c = conn.cursor()
+    requete = mysql.cursor()
+    requete.execute('SELECT id, date, duree, nbStation, nbBikeMin, nbBikeMax, nbBikeMoyenne, nbEBikeMin, nbEBikeMax, nbEBikeMoyenne, nbFreeEDockMin, nbFreeEDockMax, nbFreeEDockMoyenne, nbEDock \
+    FROM resumeConso \
+    WHERE date >= "'+dateDebutStr+'" AND date < "'+dateFinStr+'"')
+    stations = requete.fetchall()
+    for station in stations:
+        c.execute('INSERT INTO resumeConso (id, date, duree, nbStation, nbBikeMin, nbBikeMax, nbBikeMoyenne, nbEBikeMin, nbEBikeMax, nbEBikeMoyenne, nbFreeEDockMin, nbFreeEDockMax, nbFreeEDockMoyenne, nbEDock) VALUES \
+        ('+str(station[0])+', "'+str(station[1])+'", '+str(station[2])+', '+str(station[3])+', '+str(station[4])+', '+str(station[5])+', '+str(station[6])+', '+str(station[7])+', '+str(station[8])+', '+str(station[9])+', '+str(station[10])+', '+str(station[11])+', '+str(station[12])+', '+str(station[13])+')')
+    conn.commit()
+
+    c = conn.cursor()
+    requete = mysql.cursor()
+    requete.execute('SELECT	id, code, date, duree, nbBikeMin, nbBikeMax, nbBikeMoyenne, nbBikePris, nbBikeRendu, nbEBikeMin, nbEBikeMax, nbEBikeMoyenne, nbEBikePris, nbEBikeRendu, nbFreeEDockMin, nbFreeEDockMax, nbFreeEDockMoyenne, nbEDock, nbBikeOverflowMin, nbBikeOverflowMax, nbBikeOverflowMoyenne, nbEBikeOverflowMin, nbEBikeOverflowMax, nbEBikeOverflowMoyenne, maxBikeOverflow \
+    FROM resumeStatus \
+    WHERE date >= "'+dateDebutStr+'" AND date < "'+dateFinStr+'"')
+    stations = requete.fetchall()
+    for station in stations:
+        c.execute('INSERT INTO resumeStatus (id, code, date, duree, nbBikeMin, nbBikeMax, nbBikeMoyenne, nbBikePris, nbBikeRendu, nbEBikeMin, nbEBikeMax, nbEBikeMoyenne, nbEBikePris, nbEBikeRendu, nbFreeEDockMin, nbFreeEDockMax, nbFreeEDockMoyenne, nbEDock, nbBikeOverflowMin, nbBikeOverflowMax, nbBikeOverflowMoyenne, nbEBikeOverflowMin, nbEBikeOverflowMax, nbEBikeOverflowMoyenne, maxBikeOverflow) VALUES \
+        ('+str(station[0])+', '+str(station[1])+', "'+str(station[2])+'", '+str(station[3])+', '+str(station[4])+', '+str(station[5])+
+        ', '+str(station[6])+', '+str(station[7])+', '+str(station[8])+', '+str(station[9])+', '+str(station[10])+', '+str(station[11])+
+        ', '+str(station[12])+', '+str(station[13])+', '+str(station[14])+', '+str(station[15])+', '+str(station[16])+', '+str(station[17])+
+        ', '+str(station[18])+', '+str(station[19])+', '+str(station[20])+', '+str(station[21])+', '+str(station[22])+', '+str(station[23])+
+        ', '+str(station[24])+')')
+    conn.commit()
+
+    #Et on ferme le fichier
+    c.close()
