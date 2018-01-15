@@ -96,7 +96,7 @@ CREATE TABLE `stations` (
   `latitude` decimal(16,14) NOT NULL,
   `longitude` decimal(16,14) NOT NULL,
   `type` varchar(256) NOT NULL,
-  `dateOuverture` date NOT NULL,
+  `dateOuverture` date DEFAULT NULL,
   `adresse` text
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 

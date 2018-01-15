@@ -8,11 +8,15 @@ def getAllStation():
 
     #On récupère la liste des stations déjà en base
     requete = mysql.cursor()
-    requete.execute('SELECT code FROM stations')
+    requete.execute('SELECT code, dateOuverture FROM stations')
     rep = requete.fetchall()
+    aujourdhui = datetime.today().date()
     stations = []
-    for code in rep:
-        stations.append(code[0])
+    stationsFutur = []
+    for row in rep:
+        stations.append(row[0])
+        if(row[1] is None or row[1] > aujourdhui):
+            stationsFutur.append(row[0])
 
     nbTotalBike = 0
     nbTotalEBike = 0
@@ -37,9 +41,8 @@ def getAllStation():
         if codeStation not in stations:
             longitude = infoStation['gps']['longitude']
             latitude = infoStation['gps']['latitude']
-            if infoStation['state'] != 'Operative' and 'dueDate' in infoStation and infoStation['dueDate'] != None:
-                dateOuverture = datetime.fromtimestamp(infoStation['dueDate'])
-                strDateOuverture = '"'+dateOuverture.strftime("%Y-%m-%d")+'"'
+            if infoStation['state'] != 'Operative' :
+                strDateOuverture = 'NULL'
             else:
                 strDateOuverture = 'CURDATE()'
             requete = mysql.cursor()
@@ -54,9 +57,16 @@ def getAllStation():
             ok = False
 
         if ok:
+            nbEDock = etatStation['nbDock']+etatStation['nbEDock']
             requete = mysql.cursor()
             requete.execute('INSERT INTO status (code, idConso, state, nbBike, nbEBike, nbFreeEDock, nbEDock, nbBikeOverflow, nbEBikeOverflow, maxBikeOverflow) VALUES \
-            ('+str(codeStation)+', '+strIdConso+', "'+str(infoStation['state'])+'", '+str(etatStation['nbBike'])+', '+str(etatStation['nbEbike'])+', '+str((etatStation['nbFreeDock']+etatStation['nbFreeEDock']))+', '+str((etatStation['nbDock']+etatStation['nbEDock']))+', '+str(etatStation['nbBikeOverflow'])+', '+str(etatStation['nbEBikeOverflow'])+', '+str(etatStation['maxBikeOverflow'])+')')
+            ('+str(codeStation)+', '+strIdConso+', "'+str(infoStation['state'])+'", '+str(etatStation['nbBike'])+', '+str(etatStation['nbEbike'])+', '+str((etatStation['nbFreeDock']+etatStation['nbFreeEDock']))+', '+str(nbEDock)+', '+str(etatStation['nbBikeOverflow'])+', '+str(etatStation['nbEBikeOverflow'])+', '+str(etatStation['maxBikeOverflow'])+')')
+
+            #On met à jour la station au besoin
+            if codeStation in stationsFutur and nbEDock > 0:
+                requete = mysql.cursor()
+                requete.execute('UPDATE stations \
+                SET dateOuverture = CURDATE() WHERE code = '+str(codeStation))
 
             #On ajoute a la conso
             nbTotalBike += int(etatStation['nbBike'])
