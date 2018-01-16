@@ -45,8 +45,8 @@ else
     <body>
         <h1>Vélib Stats (site non officiel)</h1>
         <ul>
-            <li>Nombre de stations annoncées (<abbr title="Stations affichées comme étant ouverte">définition</abbr>) : <?php echo $conso['nbStation']; ?></li>
-            <li>Nombre de stations détectées (<abbr title="Stations avec un nombre de bornes positifs avec au moins un vélo ou une borne libre">définition</abbr>) : <?php echo $conso['nbStationDetecte']; ?></li>
+            <li>Nombre de stations ouvertes annoncées (<abbr title="Stations affichées comme étant ouverte">définition</abbr>) : <?php echo $conso['nbStation']; ?></li>
+            <li>Nombre de stations ouvertes détectées (<abbr title="Stations avec un nombre de bornes positifs avec au moins un vélo ou une borne libre">définition</abbr>) : <?php echo $conso['nbStationDetecte']; ?></li>
             <li>Nombre de vélos mécaniques disponible : <?php echo $conso['nbBike']; ?></li>
             <li>Nombre de vélos électriques disponible : <?php echo $conso['nbEbike']; ?></li>
             <li>Nombre de bornes libres : <?php echo $conso['nbFreeEDock']; ?></li>
@@ -62,7 +62,7 @@ else
             <option value="unJour">Un jour - Période de 15 minutes</option>
             <option value="septJours" selected>Une semaine - Période d'une heure</option>
             <option value="unMois">Un mois - Période de six heures</option>
-        </select>
+        </select> Graphique issu du site velib.nocle.fr
         <canvas id="chartNbStations" width="1000" height="400"></canvas>
         <canvas id="chartBikes" width="1000" height="400"></canvas>
         <i>Ce site n'est pas un site officiel de vélib métropole. Les données utilisées proviennent de <a href="http://www.velib-metropole.fr">www.velib-metropole.fr</a> et appartienne à leur propriétaire. - <a href="https://framagit.org/JonathanMM/velibstats">Site du projet</a> - 
