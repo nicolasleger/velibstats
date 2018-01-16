@@ -46,6 +46,7 @@ def creerDumpData(dateDebut):
     `id` int(11) NOT NULL,
     `date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `nbStation` int(11) DEFAULT NULL,
+    `nbStationDetecte` int(11) DEFAULT NULL,
     `nbBike` int(11) DEFAULT NULL,
     `nbEbike` int(11) DEFAULT NULL,
     `nbFreeEDock` int(11) DEFAULT NULL,
@@ -69,7 +70,7 @@ def creerDumpData(dateDebut):
 
     c = conn.cursor()
     requete = mysql.cursor()
-    requete.execute('SELECT id, date, nbStation, nbBike, nbEbike, nbFreeEDock, nbEDock \
+    requete.execute('SELECT id, date, nbStation, nbStationDetecte, nbBike, nbEbike, nbFreeEDock, nbEDock \
     FROM statusConso \
     WHERE date >= "'+dateDebutStr+'" AND date < "'+dateFinStr+'"')
     stations = requete.fetchall()
@@ -80,8 +81,8 @@ def creerDumpData(dateDebut):
                 values.append('NULL')
             else:
                 values.append(str(cell))
-        c.execute('INSERT INTO statusConso (id, date, nbStation, nbBike, nbEbike, nbFreeEDock, nbEDock) VALUES \
-        ('+values[0]+', "'+values[1]+'", '+values[2]+', '+values[3]+', '+values[4]+', '+values[5]+', '+values[6]+')')
+        c.execute('INSERT INTO statusConso (id, date, nbStation, nbStationDetecte, nbBike, nbEbike, nbFreeEDock, nbEDock) VALUES \
+        ('+values[0]+', "'+values[1]+'", '+values[2]+', '+values[3]+', '+values[4]+', '+values[5]+', '+values[6]+', '+values[7]+')')
     conn.commit()
 
     c = conn.cursor()
