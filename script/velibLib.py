@@ -29,6 +29,7 @@ def getAllStation():
     idConso = requete.lastrowid
     strIdConso = str(idConso)
     nbStationsOuvertes = 0
+    nbStationsOuvertesDetectees = 0
     now = datetime.now()
 
     urlVelib = getURLVelib()
@@ -58,10 +59,13 @@ def getAllStation():
                 ok = False
 
             if ok:
-                nbEDock = etatStation['nbDock']+etatStation['nbEDock']
+                nbBike = int(etatStation['nbBike'])
+                nbEbike = int(etatStation['nbEbike'])
+                nbFreeEDock = int(etatStation['nbFreeDock'])+int(etatStation['nbFreeEDock'])
+                nbEDock = int(etatStation['nbDock'])+int(etatStation['nbEDock'])
                 requete = mysql.cursor()
                 requete.execute('INSERT INTO status (code, idConso, state, nbBike, nbEBike, nbFreeEDock, nbEDock, nbBikeOverflow, nbEBikeOverflow, maxBikeOverflow) VALUES \
-                ('+str(codeStation)+', '+strIdConso+', "'+str(infoStation['state'])+'", '+str(etatStation['nbBike'])+', '+str(etatStation['nbEbike'])+', '+str((etatStation['nbFreeDock']+etatStation['nbFreeEDock']))+', '+str(nbEDock)+', '+str(etatStation['nbBikeOverflow'])+', '+str(etatStation['nbEBikeOverflow'])+', '+str(etatStation['maxBikeOverflow'])+')')
+                ('+str(codeStation)+', '+strIdConso+', "'+str(infoStation['state'])+'", '+str(nbBike)+', '+str(nbEbike)+', '+str(nbFreeEDock)+', '+str(nbEDock)+', '+str(etatStation['nbBikeOverflow'])+', '+str(etatStation['nbEBikeOverflow'])+', '+str(etatStation['maxBikeOverflow'])+')')
 
                 #On met à jour la station au besoin
                 if codeStation in stationsFutur and nbEDock > 0:
@@ -70,17 +74,21 @@ def getAllStation():
                     SET dateOuverture = CURDATE() WHERE code = '+str(codeStation))
 
                 #On ajoute a la conso
-                nbTotalBike += int(etatStation['nbBike'])
-                nbTotalEBike += int(etatStation['nbEbike'])
-                nbTotalFreeEDock += int(etatStation['nbFreeDock'])+int(etatStation['nbFreeEDock'])
-                nbTotalEDock += int(etatStation['nbDock'])+int(etatStation['nbEDock'])
+                nbTotalBike += nbBike
+                nbTotalEBike += nbEbike
+                nbTotalFreeEDock += nbFreeEDock
+                nbTotalEDock += nbEDock
                 if infoStation['state'] == "Operative":
                     nbStationsOuvertes += 1
+                if nbEDock > 0 and nbBike + nbEbike + nbFreeEDock > 0:
+                    nbStationsOuvertesDetectees += 1
     os.remove(tmpFileName)
 
     #On insert tout dans le statut
     requete = mysql.cursor()
-    requete.execute('UPDATE statusConso SET nbStation = '+str(nbStationsOuvertes)+', \
+    requete.execute('UPDATE statusConso SET \
+    nbStation = '+str(nbStationsOuvertes)+', \
+    nbStationDetecte = '+str(nbStationsOuvertesDetectees)+' ,\
     nbBike = '+str(nbTotalBike)+', \
     nbEbike = '+str(nbTotalEBike)+', \
     nbFreeEDock = '+str(nbTotalFreeEDock)+', \
