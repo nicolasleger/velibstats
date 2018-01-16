@@ -45,7 +45,8 @@ else
     <body>
         <h1>Vélib Stats (site non officiel)</h1>
         <ul>
-            <li>Nombre de stations : <?php echo $conso['nbStation']; ?></li>
+            <li>Nombre de stations annoncées (<abbr title="Stations affichées comme étant ouverte">définition</abbr>) : <?php echo $conso['nbStation']; ?></li>
+            <li>Nombre de stations détectées (<abbr title="Stations avec un nombre de bornes positifs avec au moins un vélo ou une borne libre">définition</abbr>) : <?php echo $conso['nbStationDetecte']; ?></li>
             <li>Nombre de vélos mécaniques disponible : <?php echo $conso['nbBike']; ?></li>
             <li>Nombre de vélos électriques disponible : <?php echo $conso['nbEbike']; ?></li>
             <li>Nombre de bornes libres : <?php echo $conso['nbFreeEDock']; ?></li>
