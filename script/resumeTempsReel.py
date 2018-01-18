@@ -1,5 +1,4 @@
-from resumeLib import debuterCalculResume,debuterCalculResumeConso
-import datetime
+from resumeLib import debuterCalculResume, debuterCalculResumeConso
 
 debuterCalculResume(5)
 debuterCalculResumeConso(5)

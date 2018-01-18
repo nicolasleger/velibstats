@@ -169,7 +169,7 @@ def calculerResumeConso(dateConsoDT, dureeConso):
     finConso = dateConsoDT + datetime.timedelta(minutes=dureeConso)
     dateConsoFin = finConso.strftime("%Y-%m-%d %H:%M:%S")
 
-    proprietes = ['nbStation', 'nbBike', 'nbEBike', 'nbFreeEDock', 'nbEDock']
+    proprietes = ['nbStation', 'nbStationDetecte', 'nbBike', 'nbEBike', 'nbFreeEDock', 'nbEDock']
     mysql = getMysqlConnection()
 
     requete = mysql.cursor()
@@ -183,7 +183,7 @@ def calculerResumeConso(dateConsoDT, dureeConso):
         for i, cle in enumerate(proprietes):
             if not row[i] is None:
                 valeurProp = int(row[i])
-                if cle in ['nbStation', 'nbEDock']:
+                if cle in ['nbStation', 'nbStationDetecte', 'nbEDock']:
                     if not cle in bikeList:
                         bikeList[cle] = valeurProp
                     else:
@@ -210,8 +210,8 @@ def calculerResumeConso(dateConsoDT, dureeConso):
         nbEDock = 0
         if nbEDock in valeurs:
             nbEDock = valeurs['nbEDock']
-        requete.execute('INSERT INTO `resumeConso` (`id`, `date`, `duree`, `nbStation`, `nbBikeMin`, `nbBikeMax`, `nbBikeMoyenne`, `nbEBikeMin`, `nbEBikeMax`, `nbEBikeMoyenne`, `nbFreeEDockMin`, `nbFreeEDockMax`, `nbFreeEDockMoyenne`, `nbEDock`) VALUES \
-        (NULL, "'+dateConso+'", '+str(dureeConso)+', '+str(valeurs['nbStation'])+', '+str(valeurs['nbBike']['min'])+', '+str(valeurs['nbBike']['max'])+', '+str(valeurs['nbBike']['moyenne'])+', '+str(valeurs['nbEBike']['min'])+', '+str(valeurs['nbEBike']['max'])+', '+str(valeurs['nbEBike']['moyenne'])+', '+str(valeurs['nbFreeEDock']['min'])+', '+str(valeurs['nbFreeEDock']['max'])+', '+str(valeurs['nbFreeEDock']['moyenne'])+', '+str(nbEDock)+')')
+        requete.execute('INSERT INTO `resumeConso` (`id`, `date`, `duree`, `nbStation`, nbStationDetecte, `nbBikeMin`, `nbBikeMax`, `nbBikeMoyenne`, `nbEBikeMin`, `nbEBikeMax`, `nbEBikeMoyenne`, `nbFreeEDockMin`, `nbFreeEDockMax`, `nbFreeEDockMoyenne`, `nbEDock`) VALUES \
+        (NULL, "'+dateConso+'", '+str(dureeConso)+', '+str(valeurs['nbStation'])+', '+str(valeurs['nbStationDetecte'])+', '+str(valeurs['nbBike']['min'])+', '+str(valeurs['nbBike']['max'])+', '+str(valeurs['nbBike']['moyenne'])+', '+str(valeurs['nbEBike']['min'])+', '+str(valeurs['nbEBike']['max'])+', '+str(valeurs['nbEBike']['moyenne'])+', '+str(valeurs['nbFreeEDock']['min'])+', '+str(valeurs['nbFreeEDock']['max'])+', '+str(valeurs['nbFreeEDock']['moyenne'])+', '+str(nbEDock)+')')
 
 def calculerResumeOfResumeConso(dateConsoDT, dureeConsoOrigine, dureeConsoFinale):
     dateConso = dateConsoDT.strftime("%Y-%m-%d %H:%M:%S")
@@ -219,7 +219,7 @@ def calculerResumeOfResumeConso(dateConsoDT, dureeConsoOrigine, dureeConsoFinale
     dateConsoFin = finConso.strftime("%Y-%m-%d %H:%M:%S")
 
     #On récupère les conso
-    proprietes = ['nbStation', 'nbBikeMin', 'nbBikeMax', 'nbBikeMoyenne', 'nbEBikeMin', 'nbEBikeMax', 'nbEBikeMoyenne', 'nbFreeEDockMin', 'nbFreeEDockMax', 'nbFreeEDockMoyenne', 'nbEDock']
+    proprietes = ['nbStation', 'nbStationDetecte', 'nbBikeMin', 'nbBikeMax', 'nbBikeMoyenne', 'nbEBikeMin', 'nbEBikeMax', 'nbEBikeMoyenne', 'nbFreeEDockMin', 'nbFreeEDockMax', 'nbFreeEDockMoyenne', 'nbEDock']
     
     mysql = getMysqlConnection()
     requete = mysql.cursor()
