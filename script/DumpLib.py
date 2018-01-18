@@ -126,6 +126,7 @@ def creerDumpConso(dateDebut):
   `date` datetime NOT NULL,
   `duree` int(4) NOT NULL,
   `nbStation` int(11) NOT NULL,
+  `nbStationDetecte` int(11) DEFAULT NULL,
   `nbBikeMin` int(11) NOT NULL,
   `nbBikeMax` int(11) NOT NULL,
   `nbBikeMoyenne` int(11) NOT NULL,
@@ -172,13 +173,13 @@ def creerDumpConso(dateDebut):
     #On va récupérer chaque donnée de chaque table
     c = conn.cursor()
     requete = mysql.cursor()
-    requete.execute('SELECT id, date, duree, nbStation, nbBikeMin, nbBikeMax, nbBikeMoyenne, nbEBikeMin, nbEBikeMax, nbEBikeMoyenne, nbFreeEDockMin, nbFreeEDockMax, nbFreeEDockMoyenne, nbEDock \
+    requete.execute('SELECT id, date, duree, nbStation, nbStationDetecte, nbBikeMin, nbBikeMax, nbBikeMoyenne, nbEBikeMin, nbEBikeMax, nbEBikeMoyenne, nbFreeEDockMin, nbFreeEDockMax, nbFreeEDockMoyenne, nbEDock \
     FROM resumeConso \
     WHERE date >= "'+dateDebutStr+'" AND date < "'+dateFinStr+'"')
     stations = requete.fetchall()
     for station in stations:
-        c.execute('INSERT INTO resumeConso (id, date, duree, nbStation, nbBikeMin, nbBikeMax, nbBikeMoyenne, nbEBikeMin, nbEBikeMax, nbEBikeMoyenne, nbFreeEDockMin, nbFreeEDockMax, nbFreeEDockMoyenne, nbEDock) VALUES \
-        ('+str(station[0])+', "'+str(station[1])+'", '+str(station[2])+', '+str(station[3])+', '+str(station[4])+', '+str(station[5])+', '+str(station[6])+', '+str(station[7])+', '+str(station[8])+', '+str(station[9])+', '+str(station[10])+', '+str(station[11])+', '+str(station[12])+', '+str(station[13])+')')
+        c.execute('INSERT INTO resumeConso (id, date, duree, nbStation, nbStationDetecte, nbBikeMin, nbBikeMax, nbBikeMoyenne, nbEBikeMin, nbEBikeMax, nbEBikeMoyenne, nbFreeEDockMin, nbFreeEDockMax, nbFreeEDockMoyenne, nbEDock) VALUES \
+        ('+str(station[0])+', "'+str(station[1])+'", '+str(station[2])+', '+str(station[3])+', '+str(station[4])+', '+str(station[5])+', '+str(station[6])+', '+str(station[7])+', '+str(station[8])+', '+str(station[9])+', '+str(station[10])+', '+str(station[11])+', '+str(station[12])+', '+str(station[13])+', '+str(station[14])+')')
     conn.commit()
 
     c = conn.cursor()
