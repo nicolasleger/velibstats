@@ -77,7 +77,7 @@ foreach($signalements as $sign)
     </head>
     <body>
         <nav>
-            <a href="index.php">Retour à l'acceuil</a>
+            <a href="index.php">Retour à l'accueil</a>
         </nav>
         <h1>Vélib Stats (site non officiel) - Station <?php echo displayCodeStation($code); ?></h1>
         <ul>
