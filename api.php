@@ -502,12 +502,14 @@ function getDataConsoInstantane()
     $allConso = $requete->fetchAll();
     $dates = [];
     $nbStationsData = [];
+    $nbStationsDetecteData = [];
     foreach($allConso as $i => $c)
     {
         if($c['nbStation'] > 0)
         {
             $dates[] = (new DateTime($c['date']))->format("d/m H\hi");
             $nbStationsData[] = $c['nbStation'];
+            $nbStationsDetecteData[] = $c['nbStationDetecte'];
         }
     }
 
@@ -515,9 +517,14 @@ function getDataConsoInstantane()
         'labels' => $dates,
         'datasets' => array(
             array(
-                'label' => 'Nombre de stations',
+                'label' => 'Stations annoncées',
                 'backgroundColor' => 'rgba(173,0,130,0.5)',
                 'data' => $nbStationsData
+            ),
+            array(
+                'label' => 'Stations détectées',
+                'backgroundColor' => 'rgba(208,74,5,0.5)',
+                'data' => $nbStationsDetecteData
             )
         )
             );
@@ -629,19 +636,26 @@ function getDataConsoResume($filtre, $periode)
 
     $datesResume = [];
     $nbStationsData = [];
+    $nbStationsDetecteData = [];
     foreach($resumeStatusStation as $statut)
     {
         $datesResume[] = (new DateTime($statut['date']))->format("d/m H\hi");
         $nbStationsData[] = $statut['nbStation'];
+        $nbStationsDetecteData[] = $statut['nbStationDetecte'];
     }
 
     return array(
         'labels' => $datesResume,
         'datasets' => array(
             array(
-                'label' => 'Nombre de stations',
+                'label' => 'Stations annoncées',
                 'backgroundColor' => 'rgba(173,0,130,0.5)',
                 'data' => $nbStationsData
+            ),
+            array(
+                'label' => 'Stations détectées',
+                'backgroundColor' => 'rgba(208,74,5,0.5)',
+                'data' => $nbStationsDetecteData
             )
         )
             );

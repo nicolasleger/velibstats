@@ -66,7 +66,7 @@ function displayGraph(actionUrl, choixType)
     });
 }
 
-function getDisplayData(displayBike, displayInstantanne)
+function getDisplayData(displayBike, displayInstantanne, displayStations)
 {
     var dataDisplay = graphData;
     var displayDetails = $("#displayDetails").prop('checked');
@@ -74,6 +74,8 @@ function getDisplayData(displayBike, displayInstantanne)
         displayInstantanne = $("#dureeGraphiqueSelect").val() == 'instantanee';
     if(displayBike == undefined)
         displayBike = $("#typeGraphiqueSelect").val() == 'Bike';
+    if(displayStations == undefined)
+        displayStations = false;
     if(displayInstantanne || !displayDetails)
     {
         if(displayBike) //Vélos
@@ -91,6 +93,20 @@ function getDisplayData(displayBike, displayInstantanne)
             dataDisplay.data.datasets[1].fill = true;
             delete dataDisplay.data.datasets[1].borderColor;
             dataDisplay.options.scales.yAxes[0].stacked = true;
+        }
+        else if(displayStations) // Stations
+        {
+            dataDisplay.data.datasets = [graphDataSets[0], graphDataSets[1]];
+            //On ajuste les couleurs
+            dataDisplay.data.datasets[0].backgroundColor = 'rgba(173,0,130,0.5)';
+            dataDisplay.data.datasets[0].fill = true;
+            delete dataDisplay.data.datasets[0].borderColor;
+            dataDisplay.data.datasets[1].backgroundColor = 'rgba(208,74,5,0.5)';
+            dataDisplay.data.datasets[1].fill = true;
+            delete dataDisplay.data.datasets[1].borderColor;
+            
+            dataDisplay.options.scales.yAxes[0].stacked = false;
+            dataDisplay.options.scales.yAxes[0].ticks = {min: 0};
         }
         else //Bornes
         {
@@ -139,11 +155,13 @@ function updateGraph(data, choixType)
     var idChart = "#chartBikes";
     var isBike;
     var isInstantanne;
+    var isStation;
     if(choixType == 'Conso')
     {
         idChart = '#chartNbStations';
         isBike = false;
         isInstantanne = $("#dureeGraphiqueSelect").val() == 'instantanee';
+        isStation = true;
     } else if(choixType == 'ConsoBike')
     {
         isBike = true;
@@ -161,7 +179,7 @@ function updateGraph(data, choixType)
         graphDataSets = data.data.datasets;
     }
 
-    graphInstance[choixType] = new Chart(chartBikes, getDisplayData(isBike, isInstantanne));
+    graphInstance[choixType] = new Chart(chartBikes, getDisplayData(isBike, isInstantanne, isStation));
 }
 
 function displayDetails()
