@@ -4,8 +4,6 @@ from config import getMysqlConnection
 
 def recalculNbStationsResume(periode, dateCourante):
     dateConso = dateCourante.strftime("%Y-%m-%d %H:%M:%S")
-    minuteAvant = dateCourante - datetime.timedelta(minutes=1)
-    dateConsoAvant = minuteAvant.strftime("%Y-%m-%d %H:%M:%S")
     finConso = dateCourante + datetime.timedelta(minutes=periode)
     dateConsoFin = finConso.strftime("%Y-%m-%d %H:%M:%S")
 
@@ -106,7 +104,7 @@ print("******* Bornes *******")
 periodes = [5, 15, 60, 360]
 periodePrecedente = 0
 for periode in periodes:
-    dateCourante = dateMin
+    dateCourante = dateMin - datetime.timedelta(minutes=(dateMin.minute % periode))
     print("-> Début période "+ str(periode))
     while dateCourante + datetime.timedelta(minutes=periode) <= dateMax:
         print("Période " + str(periode)+'; date = '+str(dateCourante))
