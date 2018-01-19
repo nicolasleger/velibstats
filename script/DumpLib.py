@@ -1,6 +1,37 @@
 import sqlite3, pymysql, datetime, os
 from config import getMysqlConnection
 
+def creerStationTable(c):
+    c.execute('''
+    CREATE TABLE `stations` (
+    `code` int(11) NOT NULL,
+    `name` varchar(256) NOT NULL,
+    `latitude` decimal(16,14) NOT NULL,
+    `longitude` decimal(16,14) NOT NULL,
+    `type` varchar(256) NOT NULL,
+    `dateOuverture` date DEFAULT NULL,
+    `adresse` text
+    );
+    ''')
+
+def val(valeur):
+    if valeur is None:
+        return 'NULL'
+    return '"'+str(valeur)+'"'
+
+def creerStationData(conn, mysql):
+    c = conn.cursor()
+    requete = mysql.cursor()
+    requete.execute('''
+    SELECT code, name, latitude, longitude, type, dateOuverture, adresse
+    FROM stations
+    ''')
+    stations = requete.fetchall()
+    for station in stations:
+        c.execute('INSERT INTO stations (code, name, latitude, longitude, type, dateOuverture, adresse) VALUES \
+        ('+str(station[0])+', "'+str(station[1])+'", '+str(station[2])+', '+str(station[3])+', "'+str(station[4])+'", '+val(station[5])+', "'+str(station[6])+'")')
+    conn.commit()
+
 def creerDumpData(dateDebut):
     dateDebut = dateDebut.replace(microsecond = 0, second = 0, minute=0, hour=0)
     dateDebutStr = dateDebut.strftime("%Y-%m-%d %H:%M:%S")
@@ -15,17 +46,7 @@ def creerDumpData(dateDebut):
 
     #Creation des tables
     c = conn.cursor()
-    c.execute('''
-    CREATE TABLE `stations` (
-    `code` int(11) NOT NULL,
-    `name` varchar(256) NOT NULL,
-    `latitude` decimal(16,14) NOT NULL,
-    `longitude` decimal(16,14) NOT NULL,
-    `type` varchar(256) NOT NULL,
-    `dateOuverture` date DEFAULT NULL,
-    `adresse` text
-    );
-    ''')
+    creerStationTable(c)
     c.execute('''
     CREATE TABLE `status` (
     `id` int(11) NOT NULL,
@@ -56,17 +77,7 @@ def creerDumpData(dateDebut):
     conn.commit()
 
     #On va récupérer chaque donnée de chaque table
-    c = conn.cursor()
-    requete = mysql.cursor()
-    requete.execute('''
-    SELECT code, name, latitude, longitude, type, dateOuverture, adresse
-    FROM stations
-    ''')
-    stations = requete.fetchall()
-    for station in stations:
-        c.execute('INSERT INTO stations (code, name, latitude, longitude, type, dateOuverture, adresse) VALUES \
-        ('+str(station[0])+', "'+str(station[1])+'", '+str(station[2])+', '+str(station[3])+', "'+str(station[4])+'", "'+str(station[5])+'", "'+str(station[6])+'")')
-    conn.commit()
+    creerStationData(conn, mysql)
 
     c = conn.cursor()
     requete = mysql.cursor()
@@ -77,12 +88,9 @@ def creerDumpData(dateDebut):
     for station in stations:
         values = []
         for cell in station:
-            if cell is None:
-                values.append('NULL')
-            else:
-                values.append(str(cell))
+            values.append(val(cell))
         c.execute('INSERT INTO statusConso (id, date, nbStation, nbStationDetecte, nbBike, nbEbike, nbFreeEDock, nbEDock) VALUES \
-        ('+values[0]+', "'+values[1]+'", '+values[2]+', '+values[3]+', '+values[4]+', '+values[5]+', '+values[6]+', '+values[7]+')')
+        ('+values[0]+', '+values[1]+', '+values[2]+', '+values[3]+', '+values[4]+', '+values[5]+', '+values[6]+', '+values[7]+')')
     conn.commit()
 
     c = conn.cursor()
@@ -95,12 +103,9 @@ def creerDumpData(dateDebut):
     for statut in statuts:
         values = []
         for cell in statut:
-            if cell is None:
-                values.append('NULL')
-            else:
-                values.append(str(cell))
+            values.append(val(cell))
         c.execute('INSERT INTO status (id, code, idConso, state, nbBike, nbEBike, nbFreeEDock, nbEDock, nbBikeOverflow, nbEBikeOverflow, maxBikeOverflow) VALUES \
-        ("'+'", "'.join(values)+'")')
+        ('+', '.join(values)+')')
     conn.commit()
 
     #Et on ferme le fichier
@@ -120,6 +125,7 @@ def creerDumpConso(dateDebut):
 
     #Creation des tables
     c = conn.cursor()
+    creerStationTable(c)
     c.execute('''
     CREATE TABLE `resumeConso` (
   `id` int(11) NOT NULL,
@@ -171,6 +177,7 @@ def creerDumpConso(dateDebut):
     conn.commit()
 
     #On va récupérer chaque donnée de chaque table
+    creerStationData(conn, mysql)
     c = conn.cursor()
     requete = mysql.cursor()
     requete.execute('SELECT id, date, duree, nbStation, nbStationDetecte, nbBikeMin, nbBikeMax, nbBikeMoyenne, nbEBikeMin, nbEBikeMax, nbEBikeMoyenne, nbFreeEDockMin, nbFreeEDockMax, nbFreeEDockMoyenne, nbEDock \
@@ -178,8 +185,11 @@ def creerDumpConso(dateDebut):
     WHERE date >= "'+dateDebutStr+'" AND date < "'+dateFinStr+'"')
     stations = requete.fetchall()
     for station in stations:
+        values = []
+        for cell in station:
+            values.append(val(cell))
         c.execute('INSERT INTO resumeConso (id, date, duree, nbStation, nbStationDetecte, nbBikeMin, nbBikeMax, nbBikeMoyenne, nbEBikeMin, nbEBikeMax, nbEBikeMoyenne, nbFreeEDockMin, nbFreeEDockMax, nbFreeEDockMoyenne, nbEDock) VALUES \
-        ('+str(station[0])+', "'+str(station[1])+'", '+str(station[2])+', '+str(station[3])+', '+str(station[4])+', '+str(station[5])+', '+str(station[6])+', '+str(station[7])+', '+str(station[8])+', '+str(station[9])+', '+str(station[10])+', '+str(station[11])+', '+str(station[12])+', '+str(station[13])+', '+str(station[14])+')')
+        ('+', '.join(values)+')')
     conn.commit()
 
     c = conn.cursor()
@@ -189,12 +199,11 @@ def creerDumpConso(dateDebut):
     WHERE date >= "'+dateDebutStr+'" AND date < "'+dateFinStr+'"')
     stations = requete.fetchall()
     for station in stations:
+        values = []
+        for cell in station:
+            values.append(val(cell))
         c.execute('INSERT INTO resumeStatus (id, code, date, duree, nbBikeMin, nbBikeMax, nbBikeMoyenne, nbBikePris, nbBikeRendu, nbEBikeMin, nbEBikeMax, nbEBikeMoyenne, nbEBikePris, nbEBikeRendu, nbFreeEDockMin, nbFreeEDockMax, nbFreeEDockMoyenne, nbEDock, nbBikeOverflowMin, nbBikeOverflowMax, nbBikeOverflowMoyenne, nbEBikeOverflowMin, nbEBikeOverflowMax, nbEBikeOverflowMoyenne, maxBikeOverflow) VALUES \
-        ('+str(station[0])+', '+str(station[1])+', "'+str(station[2])+'", '+str(station[3])+', '+str(station[4])+', '+str(station[5])+
-        ', '+str(station[6])+', '+str(station[7])+', '+str(station[8])+', '+str(station[9])+', '+str(station[10])+', '+str(station[11])+
-        ', '+str(station[12])+', '+str(station[13])+', '+str(station[14])+', '+str(station[15])+', '+str(station[16])+', '+str(station[17])+
-        ', '+str(station[18])+', '+str(station[19])+', '+str(station[20])+', '+str(station[21])+', '+str(station[22])+', '+str(station[23])+
-        ', '+str(station[24])+')')
+        ('+', '.join(values)+')')
     conn.commit()
 
     #Et on ferme le fichier
