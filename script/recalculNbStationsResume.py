@@ -72,12 +72,13 @@ def recalculNbStationsResumeOfResume(periodeOrigine, periodeFinale, dateCourante
     infosCourantes = {}
     for row in consos:
         for i, cle in enumerate(proprietes):
-            valeurProp = int(row[i])
-            
-            if cle in infosCourantes:
-                infosCourantes[cle] = max(infosCourantes[cle], valeurProp)
-            else:
-                infosCourantes[cle] = valeurProp
+            if not row[i] is None:
+                valeurProp = int(row[i])
+                
+                if cle in infosCourantes:
+                    infosCourantes[cle] = max(infosCourantes[cle], valeurProp)
+                else:
+                    infosCourantes[cle] = valeurProp
 
     #Et on met à jour
     if infosCourantes != {} and 'nbStation' in infosCourantes and 'nbStationDetecte' in infosCourantes:
@@ -104,7 +105,7 @@ print("******* Bornes *******")
 periodes = [5, 15, 60, 360]
 periodePrecedente = 0
 for periode in periodes:
-    dateCourante = dateMin - datetime.timedelta(minutes=(dateMin.minute % periode))
+    dateCourante = dateMin - datetime.timedelta(minutes=((dateMin.hour * 60 + dateMin.minute) % periode))
     print("-> Début période "+ str(periode))
     while dateCourante + datetime.timedelta(minutes=periode) <= dateMax:
         print("Période " + str(periode)+'; date = '+str(dateCourante))
