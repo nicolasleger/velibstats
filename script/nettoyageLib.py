@@ -18,3 +18,8 @@ def nettoyerConso(date, filtre):
     requete.execute('DELETE FROM resumeStatus WHERE date < "'+dateStr+'" AND ('+filtre+')')
     requete = mysql.cursor()
     requete.execute('DELETE FROM resumeConso WHERE date < "'+dateStr+'" AND ('+filtre+')')
+
+def optimiserBDD():
+    mysql = getMysqlConnection()
+    requete = mysql.cursor()
+    requete.execute('OPTIMIZE TABLE resumeConso, resumeStatus, status, statusConso')
