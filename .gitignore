@@ -7,3 +7,5 @@ script/fixStation.py
 *.zip
 *.db
 .vscode
+templates_c/*
+!templates_c/README.md
