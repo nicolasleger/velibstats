@@ -1,5 +1,6 @@
 <?php
-html_entete('Carte','red');																					//fonction qui appelle tout ce qui va bien pour initialiser la page (liaison BDD, balises HTML jusqu'à <body>, 
+require_once('config.php');
+include_once('functions.php');
 
 /*arguments :
 largeur_carte 		:	nombre de pixels de largeur de l'image SVG à générer
@@ -16,16 +17,18 @@ titre				:	titre du graphique : tableaux de tableaux, chaque élément comporte 
 
 function carte($largeur_carte,$hauteur_carte,$couleur=array(),$texte=array(),$filtre=0,$titre=array())
 	{
+		global $pdo;
 																												//récupération des coordonnées MIN et MAX des communes (en 1/10 000 000 de degré)
-	if($filtre==0)				$resultat=REQ('SELECT MIN(ouest) AS O, MAX(est) AS E, MAX(nord) AS N, MIN(sud) AS S FROM commune');										//pas de filtre
-	else if($filtre<=100)		$resultat=REQ('SELECT MIN(ouest) AS O, MAX(est) AS E, MAX(nord) AS N, MIN(sud) AS S FROM commune WHERE dept="'.$filtre.'"');			//filtre sur un département
-	else if($filtre<=1000)		$resultat=REQ('SELECT MIN(ouest) AS O, MAX(est) AS E, MAX(nord) AS N, MIN(sud) AS S FROM commune WHERE etab+100="'.$filtre.'"');		//filtre sur un epic
-	else 						$resultat=REQ('SELECT MIN(ouest) AS O, MAX(est) AS E, MAX(nord) AS N, MIN(sud) AS S FROM commune WHERE insee="'.$filtre.'"');			//filtre sur une commune
-
+	if($filtre==0)				$requete = $pdo->query('SELECT MIN(ouest) AS O, MAX(est) AS E, MAX(nord) AS N, MIN(sud) AS S FROM commune');										//pas de filtre
+	else if($filtre<=100)		$requete = $pdo->query('SELECT MIN(ouest) AS O, MAX(est) AS E, MAX(nord) AS N, MIN(sud) AS S FROM commune WHERE dept="'.$filtre.'"');			//filtre sur un département
+	else if($filtre<=1000)		$requete = $pdo->query('SELECT MIN(ouest) AS O, MAX(est) AS E, MAX(nord) AS N, MIN(sud) AS S FROM commune WHERE etab+100="'.$filtre.'"');		//filtre sur un epic
+	else 						$requete = $pdo->query('SELECT MIN(ouest) AS O, MAX(est) AS E, MAX(nord) AS N, MIN(sud) AS S FROM commune WHERE insee="'.$filtre.'"');			//filtre sur une commune
+	$resultat = $requete->fetchAll();
 	if($resultat[0]['O']=='')																					//si le filtre renvoie une table vide, affichuge de toute la carte
 		{
 		$filtre=0;
-		$resultat=REQ('SELECT MIN(ouest) AS O, MAX(est) AS E, MAX(nord) AS N, MIN(sud) AS S FROM commune');
+		$requete = $pdo->query('SELECT MIN(ouest) AS O, MAX(est) AS E, MAX(nord) AS N, MIN(sud) AS S FROM commune');
+		$resultat = $requete->fetchAll();
 		}
 
 	$centreOE=($resultat[0]['O']+$resultat[0]['E'])/2e7;														//calcul des coordonnées du centre de la carte (en degrés)
@@ -78,7 +81,8 @@ function carte($largeur_carte,$hauteur_carte,$couleur=array(),$texte=array(),$fi
 	echo '<g style="stroke:black; stroke-width:0.2; fill-opacity:0.5;">';										//formatage commun à toutes les communes
 	echo "\n";
 																												//récupération des données des communes (et des communes limitrophes)
-	$resultat=REQ('SELECT * FROM commune WHERE ouest<="'.$carte_est.'" AND est>="'.$carte_ouest.'" AND nord>="'.$carte_sud.'" AND sud<="'.$carte_nord.'"');
+	$requete = $pdo->query('SELECT * FROM commune WHERE ouest<="'.$carte_est.'" AND est>="'.$carte_ouest.'" AND nord>="'.$carte_sud.'" AND sud<="'.$carte_nord.'"');
+	$resultat = $requete->fetchAll();
 
 	foreach($resultat AS $res=>$ligne)																			//détermination si les communes sont dans le filtre ou pas
 		{
@@ -131,7 +135,8 @@ function carte($largeur_carte,$hauteur_carte,$couleur=array(),$texte=array(),$fi
 $couleur_etab=array(0=>'#888888',1=>'#6887B3',2=>'#AF732A',3=>'#4EB26E',4=>'#AE335B',5=>'#EE7E70',6=>'#A2CC84',7=>'#3797D3',8=>'#E74B3D',9=>'#C89D67',10=>'#F39D1F',11=>'#577364',12=>'#905CA1');
 $coul=array();
 $texte=array();
-$resultat=REQ('SELECT insee, dept, etab FROM commune');
+$requete = $pdo->query('SELECT insee, dept, etab FROM commune');
+$resultat = $requete->fetchAll();
 foreach($resultat AS $ligne)
 	{
 	$texte[$ligne['insee']]='['.$ligne['dept'].']';
@@ -144,7 +149,8 @@ carte(400,300,$coul,$texte,75,array(array(16,24,'Paris',16)));
 
 $coul=array();
 $texte=array();
-$resultat=REQ('SELECT insee, dept, etab FROM commune');
+$requete = $pdo->query('SELECT insee, dept, etab FROM commune');
+$resultat = $requete->fetchAll();
 foreach($resultat AS $ligne)
 	{
 	$texte[$ligne['insee']]='['.$ligne['dept'].']';
@@ -153,5 +159,4 @@ foreach($resultat AS $ligne)
 	}
 carte(400,300,$coul,$texte,94,array(array(156,292,'Val-de-Marne',16)));
 carte(400,300,$coul,$texte,0,array(array(16,24,'Métropole du Grand Paris',16),array(16,40,'Départements',12)));
-
-html_bas(0);																								//fonction ferme la BDD et insère des données de bas de page, de fin de fichier HTML, …)
+?>
