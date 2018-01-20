@@ -2,64 +2,67 @@
 require_once('config.php');
 include_once('functions.php');
 
-/*arguments :
-largeur_carte 		:	nombre de pixels de largeur de l'image SVG à générer
-hauteur_carte 		:	nombre de pixels de hauteur de l'image SVG à générer
-couleur				:	tableau associatif : numéro INSEE de la commune => couleur de la commune
-texte				:	tableau associatif : numéro INSEE de la commune => texte additionnel dans l'info-bulle
-filtre				:	communes affichées : 0 = tout, 01 à 99 = numéro de département, 100 à 999 = epic ; 1000 et + : code insee de commune ou tableau contenant la liste des numéros INSEE
-liens				:	format des liens vers lesquels pointe chaque tracé de commune (le code commune et son nom sont ajoutés à la fin)
-objets				:	liste d'objets à ajouter à la carte (chaque objet est un tableau associatif)
-
-		arguments communs :
-						nature : type d'objet à ajouter : texte, point, …
-						x : position de l'objet en pixels (positif ou nul : depuis le bord gauche / négatif : depuis le bord droit)
-						y : position de l'objet en pixels (positif ou nul : depuis le bord supérieur / négatif : depuis le bord inférieur)
-						lon : longitude de l'objet en degrés (négatif à l'Ouest, positif à l'Est), ignoré si la position x est définie
-						lat : latitude de l'objet en degrés (négatif au Sud, positif au Nord), ignoré si la position y est définie
-						taille : taille de l'objet en pixels
-						angle : angle de rotation de l'objet
-						couleur : couleur de l'objet
-						lien : lien auquel renvoie un clic sur l'objet
-						info : infobulle associée à l'objet (seulement si un lien est défini)
-
-		arguments spécifiques à "texte" :
-						texte : texte à afficher
-						align : alignement : l (gauche, par défaut), m (milieu) ou r (droite)
-
-		arguments spécifiques à "point" :
-						point : type de point : rond, carré, triangle, …
-*/
-
+/**
+ * arguments :
+ * largeur_carte 		:	nombre de pixels de largeur de l'image SVG à générer
+ * hauteur_carte 		:	nombre de pixels de hauteur de l'image SVG à générer
+ * couleur				:	tableau associatif : numéro INSEE de la commune => couleur de la commune
+ * texte				:	tableau associatif : numéro INSEE de la commune => texte additionnel dans l'info-bulle
+ * filtre				:	communes affichées : 0 = tout, 01 à 99 = numéro de département, 100 à 999 = epic ; 1000 et + : code insee de commune ou tableau contenant la liste des numéros INSEE
+ * liens				:	format des liens vers lesquels pointe chaque tracé de commune (le code commune et son nom sont ajoutés à la fin)
+ * objets				:	liste d'objets à ajouter à la carte (chaque objet est un tableau associatif)
+ *
+ *		arguments communs :
+ *						nature : type d'objet à ajouter : texte, point, …
+ *						x : position de l'objet en pixels (positif ou nul : depuis le bord gauche / négatif : depuis le bord droit)
+ *						y : position de l'objet en pixels (positif ou nul : depuis le bord supérieur / négatif : depuis le bord inférieur)
+ *						lon : longitude de l'objet en degrés (négatif à l'Ouest, positif à l'Est), ignoré si la position x est définie
+ *						lat : latitude de l'objet en degrés (négatif au Sud, positif au Nord), ignoré si la position y est définie
+ *						taille : taille de l'objet en pixels
+ * 						angle : angle de rotation de l'objet
+ *						couleur : couleur de l'objet
+ *						lien : lien auquel renvoie un clic sur l'objet
+ *						info : infobulle associée à l'objet (seulement si un lien est défini)
+ *
+ *		arguments spécifiques à "texte" :
+ *						texte : texte à afficher
+ *						align : alignement : l (gauche, par défaut), m (milieu) ou r (droite)
+ *
+ *		arguments spécifiques à "point" :
+ *						point : type de point : rond, carré, triangle, …
+ */
 function carte($largeur_carte=800,$hauteur_carte=600,$couleur=array(),$texte=array(),$filtre=0,$lien='',$objets=array())
-	{
-		global $pdo;
+{
+	global $pdo;
 																												//récupération des coordonnées MIN et MAX des communes (en 1/10 000 000 de degré)
 	if(is_array($filtre))
-		{
-		$liste='';
+	{
+		/*$liste='';
 		foreach($filtre AS $E=>$F)																																		//liste de communes
 			{
 			if($E) $liste.=',';
 			$liste.='"'.floor($F).'"';
-			}
+			}*/
+		$liste = implode(',', array_map(intval, $filtre));
 		$requete = $pdo->query('SELECT MIN(ouest) AS O, MAX(est) AS E, MAX(nord) AS N, MIN(sud) AS S FROM commune WHERE insee IN ('.$liste.')');
 		$resultat = $requete->fetchAll();
-		}
+	}
 	else if($filtre==0)			$requete = $pdo->query('SELECT MIN(ouest) AS O, MAX(est) AS E, MAX(nord) AS N, MIN(sud) AS S FROM commune');										//pas de filtre
 	else if($filtre<=100)		$requete = $pdo->query('SELECT MIN(ouest) AS O, MAX(est) AS E, MAX(nord) AS N, MIN(sud) AS S FROM commune WHERE dept="'.$filtre.'"');			//filtre sur un département
 	else if($filtre<=1000)		$requete = $pdo->query('SELECT MIN(ouest) AS O, MAX(est) AS E, MAX(nord) AS N, MIN(sud) AS S FROM commune WHERE etab+100="'.$filtre.'"');		//filtre sur un epic
 	else 						$requete = $pdo->query('SELECT MIN(ouest) AS O, MAX(est) AS E, MAX(nord) AS N, MIN(sud) AS S FROM commune WHERE insee="'.$filtre.'"');			//filtre sur une commune
 	$resultat = $requete->fetchAll();
 	if($resultat[0]['O']=='')																					//si le filtre renvoie une table vide, affichuge de toute la carte
-		{
+	{
 		$filtre=0;
 		$requete = $pdo->query('SELECT MIN(ouest) AS O, MAX(est) AS E, MAX(nord) AS N, MIN(sud) AS S FROM commune');
 		$resultat = $requete->fetchAll();
-		}
+	}
 
-	$centreOE=($resultat[0]['O']+$resultat[0]['E'])/2e7;														//calcul des coordonnées du centre de la carte (en degrés)
-	$centreNS=($resultat[0]['N']+$resultat[0]['S'])/2e7;
+	$coeffConversionDegre = 1e7; //On travaille au dix millionième de degré
+
+	$centreOE=($resultat[0]['O']+$resultat[0]['E'])/(2*$coeffConversionDegre);														//calcul des coordonnées du centre de la carte (en degrés)
+	$centreNS=($resultat[0]['N']+$resultat[0]['S'])/(2*$coeffConversionDegre);
 
 	$km_lat=20003.932/180;																						//écart en km entre deux degrés de latitude
 	$km_lon=$km_lat*cos(deg2rad($centreNS));																	//écart en km entre deux degrés de longitude (utilisation de la latitude du centre de la carte)
