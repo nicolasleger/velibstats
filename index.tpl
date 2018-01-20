@@ -90,7 +90,36 @@
             $(document).ready( function () {
                 var dt = $('#stations').DataTable({
                     ajax: 'api.php?action=getDataConso&idConso={$idConso}',
-                    columns: ['codeStr', 'name', 'dateOuverture', 'state', 'nbBike', 'nbEbike', 'nbFreeEDock'],
+                    columns: [{
+                        data: 'codeStr',
+                        render: function(data, type, row, meta)
+                        {
+                            return '<a href="station.php?code='+row.code+'">'+data+'</a>';
+                        }
+                    },{
+                        data: 'name'
+                    },{
+                        data: 'dateOuverture',
+                        render: function(data, type, row, meta)
+                        {
+                            if(data == 'Non ouvert')
+                                return data;
+                            var date = new Date(data);
+                            return putZero(date.getDate()) + '/' + putZero(date.getMonth()+1) + '/' + date.getFullYear();
+                        }
+                    },{
+                        data: 'state'
+                    },{
+                        data: 'nbBike'
+                    },{
+                        data: 'nbEbike'
+                    },{
+                        data: 'nbFreeEDock',
+                        render: function(data, type, row, meta)
+                        {
+                            return data+'/'+row.nbEDock;
+                        }
+                    }],
                     language: dtTraduction
                 });
                 filtreDataTable();

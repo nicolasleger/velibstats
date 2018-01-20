@@ -275,3 +275,10 @@ var dtTraduction = {
         "sSortDescending": ": activer pour trier la colonne par ordre d&eacute;croissant"
     }
 };
+
+function putZero(num)
+{
+    if(num <= 9)
+        return '0'+num;
+    return num;
+}
