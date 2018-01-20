@@ -107,6 +107,10 @@ switch($_GET['action'])
         echo json_encode(getDataConso($idConso));
         exit();
         break;
+    case 'getDataStation':
+        echo json_encode(getDataStation($codeStation));
+        exit();
+        break;
 }
 
 function getBikeInstantane($codeStation)
@@ -757,6 +761,34 @@ function getDataConso($idConso)
             'nbEbike' => $station['nbEBike'],
             'nbFreeEDock' => $station['nbFreeEDock'],
             'nbEDock' => $station['nbEDock']
+        );
+    }
+    return array('data' => $retour);
+}
+
+function getDataStation($codeStation)
+{
+    global $pdo;
+    //Filtre 24 heures
+    $hier = new DateTime("-1day");
+    $filtreDate = $hier->format('Y-m-d H:i:s');
+
+    //Stations
+    $requete = $pdo->query('SELECT c.date, s.nbBike, s.nbEBike, s.nbFreeEDock, s.nbEDock 
+    FROM status s 
+    INNER JOIN statusConso c ON c.id = s.idConso 
+    WHERE s.code = '.$codeStation.' AND c.date >= "'.$filtreDate.'" 
+    ORDER BY s.code ASC');
+    $statusStation = $requete->fetchAll(PDO::FETCH_ASSOC);
+    $retour = [];
+    foreach($statusStation as $statut)
+    {
+        $retour[] = array(
+            'date' => $statut['date'],
+            'nbBike' => $statut['nbBike'],
+            'nbEbike' => $statut['nbEBike'],
+            'nbFreeEDock' => $statut['nbFreeEDock'],
+            'nbEDock' => $statut['nbEDock']
         );
     }
     return array('data' => $retour);
