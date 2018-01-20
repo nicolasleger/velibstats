@@ -102,8 +102,7 @@ function carte($largeur_carte=800,$hauteur_carte=600,$couleur=array(),$texte=arr
 	echo '<style type="text/css">';
 	echo 'a:focus { outline-style: none;}';																		//désactivation de la ligne en pointillés autour de la zone cliquée
 	echo 'path:hover {fill-opacity:1;}';																			//la zone survolée se colore en ble
-	echo '</style>';
-	echo "\n";
+	echo '</style>'."\n";
 
 	echo '<rect x="0" y="0" width="'.$largeur_carte.'" height="'.$hauteur_carte.'" fill="white"/>';
 
@@ -112,33 +111,50 @@ function carte($largeur_carte=800,$hauteur_carte=600,$couleur=array(),$texte=arr
 	echo '<g style="stroke:black; stroke-width:'.$stroke.'; fill-opacity:0.5;">';										//formatage commun à toutes les communes
 	echo "\n";
 																												//récupération des données des communes (et des communes limitrophes)
-	$requete = $pdo->query('SELECT * FROM commune WHERE ouest<="'.$carte_est.'" AND est>="'.$carte_ouest.'" AND nord>="'.$carte_sud.'" AND sud<="'.$carte_nord.'"');
+	$requete = $pdo->query('SELECT * FROM commune 
+	WHERE ouest<="'.$carte_est.'" AND est>="'.$carte_ouest.'" AND nord>="'.$carte_sud.'" AND sud<="'.$carte_nord.'"');
 	$resultat = $requete->fetchAll();
-	foreach($resultat AS $res=>$ligne)																			//détermination si les communes sont dans le filtre ou pas
+	/*foreach($resultat AS $res=>$ligne)																			//détermination si les communes sont dans le filtre ou pas
 		{
 		if(is_array($filtre))		{ if(in_array($ligne['insee'],$filtre))	$resultat[$res]['in']=1; else $resultat[$res]['in']=0;	}
 		else if($filtre==0)			$resultat[$res]['in']=1;
 		else if($filtre<=100)		{ if($ligne['dept']==$filtre)			$resultat[$res]['in']=1; else $resultat[$res]['in']=0;	}
 		else if($filtre<=1000)		{ if($ligne['etab']+100==$filtre)		$resultat[$res]['in']=1; else $resultat[$res]['in']=0;	}
 		else						{ if($ligne['insee']==$filtre)			$resultat[$res]['in']=1; else $resultat[$res]['in']=0;	}
-		}
+		}*/
+	
+	foreach($resultat as $res => $ligne)
+	{
+		$resultat[$res]['in'] = (
+			($filtre==0) || 
+			(is_array($filtre) && in_array($ligne['insee'],$filtre)) ||
+			($filtre<=100 && $ligne['dept']==$filtre) ||
+			($filtre<=1000 && $ligne['etab']+100==$filtre) ||
+			($ligne['insee']==$filtre)
+		);
+	}
 
-	foreach($resultat AS $res=>$ligne)	if($ligne['in']==0)														//affichage en premier des communes hors filtre (arrière-plan)
+	foreach($resultat AS $ligne)
+	{
+		if($ligne['in']==0)														//affichage en premier des communes hors filtre (arrière-plan)
 		{
-		if($lien!='') echo '<a xlink:href="'.$lien.$ligne['insee'].'_'.$ligne['nom'].'">';
-		echo '<path d="M'.$ligne['contour'].'Z" style="stroke:white; ';											//contour de la commune en blanc
+			if($lien!='')
+				echo '<a xlink:href="'.$lien.$ligne['insee'].'_'.$ligne['nom'].'">';
+			echo '<path d="M'.$ligne['contour'].'Z" style="stroke:white; ';											//contour de la commune en blanc
 
-		if(isset($couleur[$ligne['insee']]))	echo 'fill:'.$couleur[$ligne['insee']].'; "/>';			//coloration de la commune en fonction de l'établissement
-		else									echo 'fill:#dddddd;"/>';
+			if(isset($couleur[$ligne['insee']]))	echo 'fill:'.$couleur[$ligne['insee']].';';			//coloration de la commune en fonction de l'établissement
+			else									echo 'fill:#dddddd;';
+			echo '"/>';
 
-		if($lien!='')
-			{
-			if(isset($texte[$ligne['insee']])) echo '<title>'.$ligne['nom_complet'].' '.$texte[$ligne['insee']].'</title>';						//affichage du nom de la commune en infobulle
-			else echo '<title>'.$ligne['nom_complet'].'</title>';														//affichage du nom de la commune en infobulle
-			}
+			if($lien!='')
+				{
+				if(isset($texte[$ligne['insee']])) echo '<title>'.$ligne['nom_complet'].' '.$texte[$ligne['insee']].'</title>';						//affichage du nom de la commune en infobulle
+				else echo '<title>'.$ligne['nom_complet'].'</title>';														//affichage du nom de la commune en infobulle
+				echo '</a>'."\n";
+				}
 
-		echo '</a>'."\n";
 		}
+	}
 
 	foreach($resultat AS $res=>$ligne)	if($ligne['in']==1)														//affichage en dernier des communes dans le filtre (avant-plan)
 		{
