@@ -14,8 +14,19 @@ header('Content-Type: application/json');
 
 if(isset($_GET['codeStation']))
     $codeStation = intval($_GET['codeStation']);
+
 if(isset($_GET['idConso']))
     $idConso = intval($_GET['idConso']);
+
+if(isset($_GET['lat']))
+    $latitude = floatval($_GET['lat']);
+else
+    $latitude = null;
+
+if(isset($_GET['long']))
+    $longitude = floatval($_GET['long']);
+else
+    $longitude = null;
 
 switch($_GET['action'])
 {
@@ -104,7 +115,7 @@ switch($_GET['action'])
         exit();
         break;
     case 'getDataConso':
-        echo json_encode(getDataConso($idConso));
+        echo json_encode(getDataConso($idConso, $longitude, $latitude));
         exit();
         break;
     case 'getDataStation':
@@ -743,10 +754,20 @@ function getDataConsoBikeResume($filtre, $periode)
             );
 }
 
-function getDataConso($idConso)
+function getDataConso($idConso, $longitude = null, $latitude = null)
 {
     global $pdo;
-    $requete = $pdo->query('SELECT * FROM status inner join `stations` on stations.code = status.code WHERE idConso = '.$idConso.' order by status.code asc');
+    $whereCoord = '';
+    if(!is_null($longitude) && !is_null($latitude))
+    {
+        $whereCoord = ' AND '.implode(' AND ', array(
+            'stations.longitude >= '.($longitude - 0.015),       
+            'stations.longitude <= '.($longitude + 0.015),       
+            'stations.latitude >= '.($latitude - 0.01),       
+            'stations.latitude <= '.($latitude + 0.01)       
+        ));
+    }
+    $requete = $pdo->query('SELECT * FROM status inner join `stations` on stations.code = status.code WHERE idConso = '.$idConso.$whereCoord.' order by status.code asc');
     $data = $requete->fetchAll(PDO::FETCH_ASSOC);
     $retour = [];
     foreach($data as $station)
