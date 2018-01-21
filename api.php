@@ -2,15 +2,31 @@
 require_once('config.php');
 include_once('functions.php');
 
+error_reporting(E_ALL);
+
 if(!isset($_GET['action']) || strlen($_GET['action']) == 0)
     exit();
 
-if(!isset($_GET['codeStation']) || intval($_GET['codeStation']) == 0)
+if((!isset($_GET['codeStation']) || intval($_GET['codeStation']) == 0) && (!isset($_GET['idConso']) || intval($_GET['idConso']) == 0))
     exit();
 
 header('Content-Type: application/json');
 
-$codeStation = intval($_GET['codeStation']);
+if(isset($_GET['codeStation']))
+    $codeStation = intval($_GET['codeStation']);
+
+if(isset($_GET['idConso']))
+    $idConso = intval($_GET['idConso']);
+
+if(isset($_GET['lat']))
+    $latitude = floatval($_GET['lat']);
+else
+    $latitude = null;
+
+if(isset($_GET['long']))
+    $longitude = floatval($_GET['long']);
+else
+    $longitude = null;
 
 switch($_GET['action'])
 {
@@ -96,6 +112,14 @@ switch($_GET['action'])
         break;
     case 'getConsoBikeResumeUnMois':
         echo json_encode(getConsoBikeResume("-1month", 360));
+        exit();
+        break;
+    case 'getDataConso':
+        echo json_encode(getDataConso($idConso, $longitude, $latitude));
+        exit();
+        break;
+    case 'getDataStation':
+        echo json_encode(getDataStation($codeStation));
         exit();
         break;
 }
@@ -728,5 +752,67 @@ function getDataConsoBikeResume($filtre, $periode)
             )
         )
             );
+}
+
+function getDataConso($idConso, $longitude = null, $latitude = null)
+{
+    global $pdo;
+    $whereCoord = '';
+    if(!is_null($longitude) && !is_null($latitude))
+    {
+        $whereCoord = ' AND '.implode(' AND ', array(
+            'stations.longitude >= '.($longitude - 0.015),       
+            'stations.longitude <= '.($longitude + 0.015),       
+            'stations.latitude >= '.($latitude - 0.01),       
+            'stations.latitude <= '.($latitude + 0.01)       
+        ));
+    }
+    $requete = $pdo->query('SELECT * FROM status inner join `stations` on stations.code = status.code WHERE idConso = '.$idConso.$whereCoord.' order by status.code asc');
+    $data = $requete->fetchAll(PDO::FETCH_ASSOC);
+    $retour = [];
+    foreach($data as $station)
+    {
+        $retour[] = array(
+            'code' => $station['code'],
+            'codeStr' => displayCodeStation($station['code']),
+            'name' => $station['name'],
+            'dateOuverture' => is_null($station['dateOuverture']) ? 'Non ouvert' : $station['dateOuverture'],
+            'state' => (($station['state'] == 'Operative' && $station['nbEDock'] != 0) ? 'Ouverte' : 'En travaux'),
+            'nbBike' => $station['nbBike'],
+            'nbEbike' => $station['nbEBike'],
+            'nbFreeEDock' => $station['nbFreeEDock'],
+            'nbEDock' => $station['nbEDock']
+        );
+    }
+    return array('data' => $retour);
+}
+
+function getDataStation($codeStation)
+{
+    global $pdo;
+    //Filtre 24 heures
+    $hier = new DateTime("-1day");
+    $filtreDate = $hier->format('Y-m-d H:i:s');
+
+    //Stations
+    $requete = $pdo->query('SELECT c.id, c.date, s.nbBike, s.nbEBike, s.nbFreeEDock, s.nbEDock 
+    FROM status s 
+    INNER JOIN statusConso c ON c.id = s.idConso 
+    WHERE s.code = '.$codeStation.' AND c.date >= "'.$filtreDate.'" 
+    ORDER BY c.id ASC');
+    $statusStation = $requete->fetchAll(PDO::FETCH_ASSOC);
+    $retour = [];
+    foreach($statusStation as $statut)
+    {
+        $retour[] = array(
+            'idConso' => $statut['id'],
+            'date' => $statut['date'],
+            'nbBike' => $statut['nbBike'],
+            'nbEbike' => $statut['nbEBike'],
+            'nbFreeEDock' => $statut['nbFreeEDock'],
+            'nbEDock' => $statut['nbEDock']
+        );
+    }
+    return array('data' => $retour);
 }
 ?>
