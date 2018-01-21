@@ -199,7 +199,7 @@ function carte($largeur_carte=800,$hauteur_carte=600,$filtre=0,
 	$svg.='<g id="communes" transform="scale('.$largeur_f.','.$hauteur_f.') translate('.$dec_lon.','.$dec_lat.')">'."\n";
 
 //style commun à tous les tracés de communes
-	$svg.="\t".'<g id="contour" style="stroke-width:'.$stroke.'; fill:#888888;">'."\n";
+	$svg.="\t".'<g id="contour" style="stroke-width:'.$stroke.'; fill:darkgray;">'."\n";
 
 //affichage en premier (arrière-plan) des communes hors sélection (in=false)
 	$svg.="\t\t".'<g id="out" style="stroke:white; fill-opacity:0.4;">'."\n";

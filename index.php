@@ -45,7 +45,7 @@ else
     <body>
         <h1>Vélib Stats (site non officiel)</h1>
         <ul>
-            <li>Nombre de stations ouvertes annoncées (<abbr title="Stations affichées comme étant ouverte">définition</abbr>) : <?php echo $conso['nbStation']; ?></li>
+            <li>Nombre de stations ouvertes annoncées (<abbr title="Stations affichées comme étant ouvertes">définition</abbr>) : <?php echo $conso['nbStation']; ?></li>
             <li>Nombre de stations ouvertes détectées (<abbr title="Stations avec un nombre de bornes positifs avec au moins un vélo ou une borne libre">définition</abbr>) : <?php echo $conso['nbStationDetecte']; ?></li>
             <li>Nombre de vélos mécaniques disponible : <?php echo $conso['nbBike']; ?></li>
             <li>Nombre de vélos électriques disponible : <?php echo $conso['nbEbike']; ?></li>
@@ -57,76 +57,132 @@ else
 		<p>
 		<?php
 
-//tableaux décrivant les communes ayant des stations
+//liste des communes ayant des stations
 $liste_communes=array();
+
+//tableaux décrivant les états des stations
+$couleur_etat=array('mediumvioletred','darkred','slateblue',10=>'indigo','darkorange','darkgreen');
+$nombre_etat=array(0,0,0,10=>0,0,0);
 $objets=array();
 
 foreach($statusStation as $station)
 	{
 //interprétation de l'état de la station 0=état non prévu
+//état 0..2 : pas de borne active ; état 10..12 : bornes actives
 	switch($station['state'])
 		{
 		case 'Work in progress': $etat=1; break;
 		case 'Operative': $etat=2; break;
 		default: echo $station['state']; $etat=0;
 		}
+	if($station['nbEDock']!=0) $etat+=10;
+	$nombre_etat[$etat]++;
 
 //récupération de la commune correspondant à la station (d'après son numéro)
 	$res=$pdo->query('SELECT insee FROM tranche WHERE debut<="'.$station['code'].'" AND fin>="'.$station['code'].'"');
 	$ligne=$res->fetch();
-//initialisation du nombre de stations + ajout à la liste des communes
-	if(!isset($nb_stations[$ligne['insee']]))
+//ajout à la liste des communes
+	if(!in_array($ligne['insee'],$liste_communes))
 		{
 		$liste_communes[]=$ligne['insee'];
 		}
 
-	if($etat==0)
+//texte en fonction du nombre de bornes
+	switch($station['nbEDock'])
 		{
-		$objets[]=array(
-					'nature'=>'point',
-					'point'=>'rond',
-					'taille'=>8,'couleur'=>'#000000',
-					'lon'=>$station['longitude'],
-					'lat'=>$station['latitude'],
-					'lien'=>'station.php?code='.$station['code'],
-					'info'=>'Station '.sprintf('%05d',$station['code'])."\n".$station['name'].'<br/>'."\n".'État inconnu');
-		}
-	else if($etat==1)
-		{
-		$objets[]=array(
-					'nature'=>'point',
-					'point'=>'triangle',
-					'taille'=>8,'couleur'=>'#800000',
-					'lon'=>$station['longitude'],
-					'lat'=>$station['latitude'],
-					'lien'=>'station.php?code='.$station['code'],
-					'info'=>'Station '.sprintf('%05d',$station['code'])."\n".$station['name'].'<br/>'."\n".'En travaux');
-		}
-	else if($etat==2)
-		{
-		$objets[]=array(
-					'nature'=>'point',
-					'point'=>'carre',
-					'taille'=>6,'couleur'=>'#008000','angle'=>'45',
-					'lon'=>$station['longitude'],
-					'lat'=>$station['latitude'],
-					'lien'=>'station.php?code='.$station['code'],
-					'info'=>'Station '.sprintf('%05d',$station['code'])."\n".$station['name'].'<br/>'."\n".'En service');
+		case 0:		$s_info2='aucune borne';				break;
+		case 1:		$s_info2='1 borne';						break;
+		default:	$s_info2=$station['nbEDock'].' bornes';	break;
 		}
 
+//forme en fonction de l'état annoncé 0=inconnu, 1=WIP, 2=Active
+	switch($etat)
+		{
+		case 0:
+		case 10:
+			$s_point='rond';
+			$s_taille=6;
+			$s_angle=0;
+			$s_info1='État inconnu';
+			break;
+		case 1:
+		case 11:
+			$s_point='triangle';
+			$s_taille=8;
+			$s_angle=0;
+			$s_info1='En travaux';
+			break;
+		case 2:
+		case 12:
+			$s_point='carre';
+			$s_taille=6;
+			$s_angle=45;
+			$s_info1='En service';
+			break;
+		}
+
+	$objets[]=array(
+			'nature'=>'point',
+			'point'=>$s_point,
+			'taille'=>$s_taille,
+			'angle'=>$s_angle,
+			'couleur'=>$couleur_etat[$etat],
+			'lon'=>$station['longitude'],
+			'lat'=>$station['latitude'],
+			'lien'=>'station.php?code='.$station['code'],
+			'info'=>'Station '.sprintf('%05d',$station['code'])."\n".$station['name'].'<br/>'."\n".$s_info1.' - '.$s_info2
+			);
 	}
-$objets[]=array('nature'=>'texte','x'=>300,'y'=>30,'texte'=>'Stations Vélib’ dans la','taille'=>24,'couleur'=>'blue','align'=>'m','angle'=>0);
-$objets[]=array('nature'=>'texte','x'=>300,'y'=>60,'texte'=>'Métropole du Grand Paris','taille'=>24,'couleur'=>'blue','align'=>'m','angle'=>0);
 
-$objets[]=array('point'=>'carre','x'=>-18,'y'=>10,'taille'=>6,'couleur'=>'#008000','angle'=>45);
-$objets[]=array('point'=>'triangle','x'=>-38,'y'=>10,'taille'=>8,'couleur'=>'#800000','angle'=>90);
+$objets[]=array('nature'=>'texte','x'=>400,'y'=>30,'texte'=>'Stations Vélib’','taille'=>24,'couleur'=>'blue','align'=>'m','angle'=>0);
 
-$objets[]=array('nature'=>'texte','x'=>-20,'y'=>20,'texte'=>'Stations ouvertes','taille'=>12,'angle'=>90,'align'=>'l');
-$objets[]=array('nature'=>'texte','x'=>-40,'y'=>20,'texte'=>'Stations fermées','taille'=>12,'angle'=>90,'align'=>'l');
+//légende (point et texte, affiché uniquement pour les états ayant au moins une station
+if($nombre_etat[12])
+	{
+	$objets[]=array('point'=>'carre','x'=>-18,'y'=>10,'taille'=>6,'couleur'=>$couleur_etat[12],'angle'=>45);
+	$objets[]=array('nature'=>'texte','x'=>-20,'y'=>20,'texte'=>'Stations en service ('.$nombre_etat[12].')','taille'=>12,'angle'=>90,'align'=>'l');
+	}
+if($nombre_etat[1])
+	{
+	$objets[]=array('point'=>'triangle','x'=>-38,'y'=>10,'taille'=>8,'couleur'=>$couleur_etat[1],'angle'=>90);
+	$objets[]=array('nature'=>'texte','x'=>-40,'y'=>20,'texte'=>'Stations en travaux ('.$nombre_etat[1].')','taille'=>12,'angle'=>90,'align'=>'l');
+	}
+if($nombre_etat[2])
+	{
+	$objets[]=array('point'=>'carre','x'=>-18,'y'=>210,'taille'=>6,'couleur'=>$couleur_etat[2],'angle'=>45);
+	$objets[]=array('nature'=>'texte','x'=>-20,'y'=>220,'texte'=>'en service sans borne ('.$nombre_etat[2].')','taille'=>12,'angle'=>90,'align'=>'l');
+	}
+if($nombre_etat[11])
+	{
+	$objets[]=array('point'=>'triangle','x'=>-38,'y'=>210,'taille'=>8,'couleur'=>$couleur_etat[11],'angle'=>90);
+	$objets[]=array('nature'=>'texte','x'=>-40,'y'=>220,'texte'=>'en travaux avec bornes ('.$nombre_etat[11].')','taille'=>12,'angle'=>90,'align'=>'l');
+	}
+if($nombre_etat[0])
+	{
+	$objets[]=array('point'=>'rond','x'=>-18,'y'=>410,'taille'=>6,'couleur'=>$couleur_etat[0],'angle'=>45);
+	$objets[]=array('nature'=>'texte','x'=>-20,'y'=>420,'texte'=>'état inconnu sans borne ('.$nombre_etat[2].')','taille'=>12,'angle'=>90,'align'=>'l');
+	}
+if($nombre_etat[10])
+	{
+	$objets[]=array('point'=>'rond','x'=>-38,'y'=>410,'taille'=>6,'couleur'=>$couleur_etat[10],'angle'=>90);
+	$objets[]=array('nature'=>'texte','x'=>-40,'y'=>420,'texte'=>'état inconnu avec bornes ('.$nombre_etat[10].')','taille'=>12,'angle'=>90,'align'=>'l');
+	}
+
+//couleurs associées aux communes
+$couleur_dept=array(75=>'Khaki',92=>'SkyBlue',93=>'LightCoral',94=>'GreenYellow',
+77=>'SkyBlue',91=>'LightCoral',78=>'Khaki',95=>'GreenYellow');
+
+$couleur_commune=array();
+foreach($liste_communes AS $commune)
+	{
+	$dept=floor($commune/1000);
+	if(isset($couleur_dept[$dept]))
+		$couleur_commune[$commune]=$couleur_dept[$dept];
+	}
 
 include('carte.php');
 
-$svg=carte(800,600,$liste_communes,'commune',array(),array(),$objets);
+$svg=carte(800,600,$liste_communes,'',array(),$couleur_commune,$objets);
 
 echo $svg;
 
