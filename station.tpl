@@ -50,12 +50,26 @@
             </tr>
         </thead>
     </table>
+    <h2>Stations à proximité</h2>
+    <table id="stations">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Nom</th>
+                <th>Date d'ouverture</th>
+                <th>Statut</th>
+                <th>Vélos mécaniques dispo</th>
+                <th>Vélos électriques dispo</th>
+                <th>Bornes libres</th>
+            </tr>
+        </thead>
+    </table>
     <script type="text/javascript">
         var codeStation = {$stationCode};
     </script>
     <script type="application/javascript">
         $(document).ready( function () {
-            $('#stats').DataTable({
+            var dt = $('#stats').DataTable({
                 ajax: 'api.php?action=getDataStation&codeStation={$stationCode}',
                 columns: [{
                     data: 'date',
@@ -75,9 +89,57 @@
                         return data+'/'+row.nbEDock;
                     }
                 }],
-                language: dtTraduction
+                language: dtTraduction,
+                initComplete: function (settings, dataAjax)
+                {
+                    var data = dataAjax['data'];
+                    if(data.length > 0)
+                        chargerListeStationProximite(data[data.length - 1]['idConso']);
+                }
             });
         } );
+
+        function chargerListeStationProximite(idConso)
+        {
+            var dtStation = $('#stations').DataTable({
+                ajax: 'api.php?action=getDataConso&idConso='+idConso+'&lat={$stationLat}&long={$stationLong}',
+                columns: [{
+                    data: 'codeStr',
+                    render: function(data, type, row, meta)
+                    {
+                        return '<a href="station.php?code='+row.code+'">'+data+'</a>';
+                    }
+                },{
+                    data: 'name',
+                    render: function(data, type, row, meta)
+                    {
+                        return '<a href="station.php?code='+row.code+'">'+data+'</a>';
+                    }
+                },{
+                    data: 'dateOuverture',
+                    render: function(data, type, row, meta)
+                    {
+                        if(data == 'Non ouvert')
+                            return data;
+                        var date = new Date(data);
+                        return putZero(date.getDate()) + '/' + putZero(date.getMonth()+1) + '/' + date.getFullYear();
+                    }
+                },{
+                    data: 'state'
+                },{
+                    data: 'nbBike'
+                },{
+                    data: 'nbEbike'
+                },{
+                    data: 'nbFreeEDock',
+                    render: function(data, type, row, meta)
+                    {
+                        return data+'/'+row.nbEDock;
+                    }
+                }],
+                language: dtTraduction
+            });
+        }
     </script>
 </div>
 {include file="footer.tpl"}

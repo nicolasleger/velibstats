@@ -795,16 +795,17 @@ function getDataStation($codeStation)
     $filtreDate = $hier->format('Y-m-d H:i:s');
 
     //Stations
-    $requete = $pdo->query('SELECT c.date, s.nbBike, s.nbEBike, s.nbFreeEDock, s.nbEDock 
+    $requete = $pdo->query('SELECT c.id, c.date, s.nbBike, s.nbEBike, s.nbFreeEDock, s.nbEDock 
     FROM status s 
     INNER JOIN statusConso c ON c.id = s.idConso 
     WHERE s.code = '.$codeStation.' AND c.date >= "'.$filtreDate.'" 
-    ORDER BY s.code ASC');
+    ORDER BY c.id ASC');
     $statusStation = $requete->fetchAll(PDO::FETCH_ASSOC);
     $retour = [];
     foreach($statusStation as $statut)
     {
         $retour[] = array(
+            'idConso' => $statut['id'],
             'date' => $statut['date'],
             'nbBike' => $statut['nbBike'],
             'nbEbike' => $statut['nbEBike'],

@@ -30,7 +30,9 @@ $smarty->assign(array(
     'stationCodeDisplay' => displayCodeStation($code),
     'stationNom' => $station['name'],
     'stationDateOuverture' => (new DateTime($station['dateOuverture']))->format('d/m/Y'),
-    'stationAdresse' => $station['adresse']
+    'stationAdresse' => $station['adresse'],
+    'stationLat' => $station['latitude'],
+    'stationLong' => $station['longitude']
 ));
 
 //Filtre semaine
