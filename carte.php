@@ -314,7 +314,7 @@ function carte($largeur_carte=800,$hauteur_carte=600,$filtre=0,
 				{
 				$svg.="\t".'<a xlink:href="'.$objet['lien'].'">'."\n";
 //ajout de l'info-bulle si elle est définie (il faut que le lien soit défini)
-				if(isset($objet['info']))
+				if($objet['info']!='')
 				$svg.="\t".'<title>'.$objet['info'].'</title>'."\n";
 				}
 
@@ -371,7 +371,7 @@ function carte($largeur_carte=800,$hauteur_carte=600,$filtre=0,
 /****** FIN DE L'AFFICHAGE DES OBJETS *****************************************/
 			if($objet['lien']!='')
 				{
-				echo "\t".'</a>'."\n";
+				$svg.="\t".'</a>'."\n";
 				}
 			}
 		$svg.='</g>'."\n";
@@ -381,40 +381,5 @@ function carte($largeur_carte=800,$hauteur_carte=600,$filtre=0,
 
 	return($svg);
 	}
-
-
-//exemples d'utilisation de la fonction
-/*
-$couleur_etab=array(0=>'#888888',1=>'#6887B3',2=>'#AF732A',3=>'#4EB26E',4=>'#AE335B',5=>'#EE7E70',6=>'#A2CC84',7=>'#3797D3',8=>'#E74B3D',9=>'#C89D67',10=>'#F39D1F',11=>'#577364',12=>'#905CA1');
-$coul=array();
-$texte=array();
-$requete = $pdo->query('SELECT insee, dept, etab FROM commune');
-$resultat = $requete->fetchAll();
-foreach($resultat AS $ligne)
-	{
-	$texte[$ligne['insee']]='['.$ligne['dept'].']';
-	if(isset($couleur_etab[$ligne['etab']])) $coul[$ligne['insee']]=$couleur_etab[$ligne['etab']];
-	else $coul[$ligne['insee']]=$couleur_etab[0];
-	}
-
-$objets=array(
-array('nature'=>'texte','x'=>300,'y'=>30,'texte'=>'Stations Vélib’ dans la','taille'=>24,'couleur'=>'blue','align'=>'m','angle'=>0),
-array('nature'=>'texte','x'=>300,'y'=>60,'texte'=>'Métropole du Grand Paris','taille'=>24,'couleur'=>'blue','align'=>'m','angle'=>0),
-
-array('point'=>'carre','x'=>-18,'y'=>10,'taille'=>8,'couleur'=>'#008000','angle'=>45),
-array('point'=>'triangle','x'=>-38,'y'=>10,'taille'=>8,'couleur'=>'#800000','angle'=>90),
-
-array('nature'=>'texte','x'=>-20,'y'=>20,'texte'=>'Stations ouvertes','taille'=>12,'angle'=>90,'align'=>'l'),
-array('nature'=>'texte','x'=>-40,'y'=>20,'texte'=>'Stations fermées','taille'=>12,'angle'=>90,'align'=>'l'))
-;
-
-$requete = $pdo->query('SELECT code, latitude, longitude,type FROM stations');
-$resultat = $requete->fetchAll();
-foreach($resultat AS $ligne)
-	{
-	if($ligne['type']=='yes') $objets[]=array('point'=>'carre','lat'=>$ligne['latitude'],'lon'=>$ligne['longitude'],'couleur'=>'#008000','info'=>'Station '.$ligne['code'],'lien'=>'http://velib.nocle.fr/station.php?code='.$ligne['code'],'angle'=>45);
-	else $objets[]=array('point'=>'triangle','lat'=>$ligne['latitude'],'lon'=>$ligne['longitude'],'couleur'=>'#800000','info'=>'Station '.$ligne['code'],'lien'=>'http://velib.nocle.fr/station.php?code='.$ligne['code']);
-	}
-*/
 
 ?>

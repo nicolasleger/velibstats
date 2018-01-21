@@ -57,24 +57,79 @@ else
 		<p>
 		<?php
 
-$objets=array(
-array('nature'=>'texte','x'=>300,'y'=>30,'texte'=>'Stations Vélib’ dans la','taille'=>24,'couleur'=>'blue','align'=>'m','angle'=>0),
-array('nature'=>'texte','x'=>300,'y'=>60,'texte'=>'Métropole du Grand Paris','taille'=>24,'couleur'=>'blue','align'=>'m','angle'=>0),
+//tableaux décrivant les communes ayant des stations
+$liste_communes=array();
+$objets=array();
 
-array('point'=>'carre','x'=>-18,'y'=>10,'taille'=>8,'couleur'=>'#008000','angle'=>45),
-array('point'=>'triangle','x'=>-38,'y'=>10,'taille'=>8,'couleur'=>'#800000','angle'=>90),
+foreach($statusStation as $station)
+	{
+//interprétation de l'état de la station 0=état non prévu
+	switch($station['state'])
+		{
+		case 'Work in progress': $etat=1; break;
+		case 'Operative': $etat=2; break;
+		default: echo $station['state']; $etat=0;
+		}
 
-array('nature'=>'texte','x'=>-20,'y'=>20,'texte'=>'Stations ouvertes','taille'=>12,'angle'=>90,'align'=>'l'),
-array('nature'=>'texte','x'=>-40,'y'=>20,'texte'=>'Stations fermées','taille'=>12,'angle'=>90,'align'=>'l'));
+//récupération de la commune correspondant à la station (d'après son numéro)
+	$res=$pdo->query('SELECT insee FROM tranche WHERE debut<="'.$station['code'].'" AND fin>="'.$station['code'].'"');
+	$ligne=$res->fetch();
+//initialisation du nombre de stations + ajout à la liste des communes
+	if(!isset($nb_stations[$ligne['insee']]))
+		{
+		$liste_communes[]=$ligne['insee'];
+		}
 
+	if($etat==0)
+		{
+		$objets[]=array(
+					'nature'=>'point',
+					'point'=>'rond',
+					'taille'=>8,'couleur'=>'#000000',
+					'lon'=>$station['longitude'],
+					'lat'=>$station['latitude'],
+					'lien'=>'station.php?code='.$station['code'],
+					'info'=>'Station '.sprintf('%05d',$station['code'])."\n".$station['name'].'<br/>'."\n".'État inconnu');
+		}
+	else if($etat==1)
+		{
+		$objets[]=array(
+					'nature'=>'point',
+					'point'=>'triangle',
+					'taille'=>8,'couleur'=>'#800000',
+					'lon'=>$station['longitude'],
+					'lat'=>$station['latitude'],
+					'lien'=>'station.php?code='.$station['code'],
+					'info'=>'Station '.sprintf('%05d',$station['code'])."\n".$station['name'].'<br/>'."\n".'En travaux');
+		}
+	else if($etat==2)
+		{
+		$objets[]=array(
+					'nature'=>'point',
+					'point'=>'carre',
+					'taille'=>6,'couleur'=>'#008000','angle'=>'45',
+					'lon'=>$station['longitude'],
+					'lat'=>$station['latitude'],
+					'lien'=>'station.php?code='.$station['code'],
+					'info'=>'Station '.sprintf('%05d',$station['code'])."\n".$station['name'].'<br/>'."\n".'En service');
+		}
 
+	}
+$objets[]=array('nature'=>'texte','x'=>300,'y'=>30,'texte'=>'Stations Vélib’ dans la','taille'=>24,'couleur'=>'blue','align'=>'m','angle'=>0);
+$objets[]=array('nature'=>'texte','x'=>300,'y'=>60,'texte'=>'Métropole du Grand Paris','taille'=>24,'couleur'=>'blue','align'=>'m','angle'=>0);
 
-		include('carte.php');
-		echo '**';
-		$svg=carte(800,600,75,'commune',array(),array(),$objets);
+$objets[]=array('point'=>'carre','x'=>-18,'y'=>10,'taille'=>6,'couleur'=>'#008000','angle'=>45);
+$objets[]=array('point'=>'triangle','x'=>-38,'y'=>10,'taille'=>8,'couleur'=>'#800000','angle'=>90);
 
-		echo $svg;
-		echo '**';
+$objets[]=array('nature'=>'texte','x'=>-20,'y'=>20,'texte'=>'Stations ouvertes','taille'=>12,'angle'=>90,'align'=>'l');
+$objets[]=array('nature'=>'texte','x'=>-40,'y'=>20,'texte'=>'Stations fermées','taille'=>12,'angle'=>90,'align'=>'l');
+
+include('carte.php');
+
+$svg=carte(800,600,$liste_communes,'commune',array(),array(),$objets);
+
+echo $svg;
+
 		?>
 		</p>
 
