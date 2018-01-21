@@ -361,18 +361,17 @@ function carte($largeur_carte=800,$hauteur_carte=600,$filtre=0,
 											if($objet['angle']!=0) $svg.=' transform="rotate('.$objet['angle'].','.$x.','.$y.')"';
 											$svg.='/>'."\n";
 											break;
-//objet de type diagramme en camembert
-						case 'pie':			$r=$objet['taille']*0.5;
+//point de type diagramme en camembert
+						case 'pie':
 //si le diagramme n'a pas le format attendu, diagramme par défaut
 											if(!isset($objet['pie'])||count($objet['pie'])!=4||$objet['pie'][0]==0) $objet_pie=array(3,1,1,1);
-
+											$couleur=array(1=>'DodgerBlue','LimeGreen','chocolate');
 //initialisation
 											$r=$objet['taille']*0.5;
 											$a1=deg2rad(90);
 											$x1=$x;
 											$y1=$y-$r;
 
-											$couleur=array(1=>'DodgerBlue','LimeGreen','chocolate');
 //pour chaque partie du diagramme (non vide)
 											for($i=1;$i<=3;$i++)
 												{
@@ -382,16 +381,21 @@ function carte($largeur_carte=800,$hauteur_carte=600,$filtre=0,
 													$a2=$a1-deg2rad(360*$prop);
 													$x2=$x+cos($a2)*$r;
 													$y2=$y-sin($a2)*$r;
+//angle inférieur ou égal à 180°
 													if($prop<=0.5)
 														{
-														$svg.="\t".'<path d="M'.$x.' '.$y.'L'.$x1.' '.$y1.'A'.$r.' '.$r.' 0 0 1 '.$x2.' '.$y2.'Z" style="fill:'.$couleur[$i].';"/>'."\n";
+														$svg.="\t".'<path d="M'.$x.' '.$y.'L'.$x1.' '.$y1.'A'.$r.' '.$r.' 0 0 1 '.$x2.' '.$y2.'Z" style="stroke:black; stroke-width:0.25; fill:'.$couleur[$i].';"/>'."\n";
 														}
+//angle entre 180° et 360°
 													else if($prop<1)
 														{
-														$svg.="\t".'<path d="M'.$x.' '.$y.'L'.$x1.' '.$y1.'A'.$r.' '.$r.' 0 1 1 '.$x2.' '.$y2.'Z" style="fill:'.$couleur[$i].';"/>'."\n";
+														$svg.="\t".'<path d="M'.$x.' '.$y.'L'.$x1.' '.$y1.'A'.$r.' '.$r.' 0 1 1 '.$x2.' '.$y2.'Z" style="stroke:black; stroke-width:0.25; fill:'.$couleur[$i].';"/>'."\n";
 														}
-													else $svg.="\t".'<circle cx="'.$x.'" cy="'.$y.'" r="'.$r.'" style="fill:'.$couleur[$i].';"/>'."\n";
-													$svg.="\t".'<circle cx="'.$x.'" cy="'.$y.'" r="'.$r.'" style="stroke:black; stroke-width:0.3; fill:none;"/>'."\n";
+//cercle complet
+													else
+														{
+														$svg.="\t".'<circle cx="'.$x.'" cy="'.$y.'" r="'.$r.'" style="stroke:black; stroke-width:0.25; fill:'.$couleur[$i].';"/>'."\n";
+														}
 
 													$a1=$a2;
 													$x1=$x2;
