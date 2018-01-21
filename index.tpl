@@ -1,5 +1,7 @@
 {include file='header.tpl'}
-<h1>Vélib Stats (site non officiel)</h1>
+<header>
+    <h1>Vélib Stats (site non officiel)</h1>
+</header>
 <ul>
     <li>Nombre de stations ouvertes annoncées (<abbr title="Stations affichées comme étant ouverte">définition</abbr>) : {$nbStation}</li>
     <li>Nombre de stations ouvertes détectées (<abbr title="Stations avec un nombre de bornes positifs avec au moins un vélo ou une borne libre">définition</abbr>) : {$nbStationDetecte}</li>

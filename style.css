@@ -1,0 +1,28 @@
+body
+{
+    padding: 0px;
+    margin: 0px;
+    font-family: Ubuntu, "Sans Serif";
+}
+
+header
+{
+    background-color: lightblue;
+    margin: 0px 0px 1em 0px;
+    padding: 1em;
+}
+
+header h1
+{
+    margin: 0px;
+}
+
+table, tr, td, th
+{
+    border: 1px solid black;
+}
+
+td
+{
+    text-align: center;
+}
