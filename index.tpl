@@ -38,7 +38,7 @@
         <option value="unJour">Un jour - Période de 15 minutes</option>
         <option value="septJours" selected>Une semaine - Période d'une heure</option>
         <option value="unMois">Un mois - Période de six heures</option>
-    </select> Graphique issu du site velib.nocle.fr<br />
+    </select> - Graphique issu du site velib.nocle.fr
     <div id="chartArea">
         <canvas id="chartNbStations" height="500px" width="800px"></canvas>
         <canvas id="chartBikes" height="500px" width="800px"></canvas>

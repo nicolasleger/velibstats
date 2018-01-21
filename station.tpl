@@ -36,7 +36,7 @@
         <option value="unMois">Un mois - Période de six heures</option>
     </select>
     <span id="displayDetailsArea"><input type="checkbox" id="displayDetails" /><label for="displayDetails">Afficher les détails</label></span>
-    Graphique issu du site velib.nocle.fr
+     - Graphique issu du site velib.nocle.fr
     <canvas id="chartBikes" width="1000" height="400"></canvas>
     {include file="credits.tpl"}
     <h2>Stats</h2>
