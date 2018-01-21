@@ -122,8 +122,8 @@ switch($_GET['action'])
         echo json_encode(getDataStation($codeStation));
         exit();
         break;
-    case 'getCommunes':
-        echo json_encode(getCommunes($idConso));
+    case 'getCommunesCarte':
+        echo json_encode(getCommunesCarte($idConso));
         exit();
         break;
 }
@@ -822,7 +822,7 @@ function getDataStation($codeStation)
     return array('data' => $retour);
 }
 
-function getCommunes($idConso)
+function getCommunesCarte($idConso)
 {
     global $pdo;
 
@@ -841,10 +841,10 @@ function getCommunes($idConso)
         //interprétation de l'état de la station 0=état non prévu
         switch($station['state'])
         {
-            case 'Work in progress': 
+            case 'En travaux': 
                 $etat = ETAT_TRAVAUX; 
                 break;
-            case 'Operative': 
+            case 'Ouverte': 
                 $etat = ETAT_OUVERTE; 
                 break;
             default: 
@@ -904,7 +904,7 @@ function getCommunes($idConso)
     $objets[] = array('nature'=>'texte','x'=>-20,'y'=>20,'texte'=>'Stations ouvertes','taille'=>12,'angle'=>90,'align'=>'l');
     $objets[] = array('nature'=>'texte','x'=>-40,'y'=>20,'texte'=>'Stations fermées','taille'=>12,'angle'=>90,'align'=>'l');
 
-    $svg = genererCarteSVG(800, 600, $liste_communes, 'commune', array(), array(), $objets);
+    $svg = genererCarteSVG(800, 500, $liste_communes, 'commune', array(), array(), $objets);
 
     return $svg;
 }

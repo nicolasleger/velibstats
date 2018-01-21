@@ -59,7 +59,7 @@ table#statsConso tr:nth-child(2)
     font-size: 2em;
 }
 
-#chartArea
+#chartArea, #statsCarteArea
 {
     display: flex;
     max-height: 500px;
