@@ -130,7 +130,7 @@ foreach($statusStation as $station)
 			'lon'=>$station['longitude'],
 			'lat'=>$station['latitude'],
 			'lien'=>'station.php?code='.$station['code'],
-			'info'=>'Station '.sprintf('%05d',$station['code'])."\n".$station['name'].'<br/>'."\n".$s_info1.' - '.$s_info2
+			'info'=>'Station '.sprintf('%05d',$station['code'])."\n".$station['name']."\n".$s_info1.' - '.$s_info2
 			);
 	}
 
