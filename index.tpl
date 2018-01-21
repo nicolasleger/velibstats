@@ -43,8 +43,7 @@
         <canvas id="chartNbStations" height="500px" width="800px"></canvas>
         <canvas id="chartBikes" height="500px" width="800px"></canvas>
     </div>
-    <i>Ce site n'est pas un site officiel de vélib métropole. Les données utilisées proviennent de <a href="http://www.velib-metropole.fr">www.velib-metropole.fr</a> et appartienne à leur propriétaire. - <a href="https://framagit.org/JonathanMM/velibstats">Site du projet</a> - 
-    Auteur : JonathanMM (<a href="https://twitter.com/Jonamaths">@Jonamaths</a>)</i>
+    {include file="credits.tpl"}
     <h2>Stations</h2>
     Fitrer : État 
     <select id="filtreEtat">
@@ -96,7 +95,11 @@
                         return '<a href="station.php?code='+row.code+'">'+data+'</a>';
                     }
                 },{
-                    data: 'name'
+                    data: 'name',
+                    render: function(data, type, row, meta)
+                    {
+                        return '<a href="station.php?code='+row.code+'">'+data+'</a>';
+                    }
                 },{
                     data: 'dateOuverture',
                     render: function(data, type, row, meta)

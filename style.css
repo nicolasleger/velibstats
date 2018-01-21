@@ -60,3 +60,24 @@ table#statsConso tr:nth-child(2)
 {
     padding: 1em;
 }
+
+#credits
+{
+    font-style: italic;
+}
+
+#credits a
+{
+    text-decoration: underline;
+}
+
+a
+{
+    text-decoration: none;
+    color: black;
+}
+
+a:hover
+{
+    text-decoration: underline;
+}
