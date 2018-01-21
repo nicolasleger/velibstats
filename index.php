@@ -21,7 +21,7 @@ $smarty->assign(array(
     'nbEbike' => $conso['nbEbike'],
     'nbEDock' => $conso['nbEDock'],
     'nbFreeEDock' => $conso['nbFreeEDock'],
-    'dateDerniereConso' => $conso['date']
+    'dateDerniereConso' => (new DateTime($conso['date']))->format('d/m/Y à H:i')
 ));
 
 $smarty->display('index.tpl');
