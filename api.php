@@ -904,7 +904,7 @@ function getCommunesCarte($idConso)
     $objets[] = array('nature'=>'texte','x'=>-20,'y'=>20,'texte'=>'Stations ouvertes','taille'=>12,'angle'=>90,'align'=>'l');
     $objets[] = array('nature'=>'texte','x'=>-40,'y'=>20,'texte'=>'Stations fermées','taille'=>12,'angle'=>90,'align'=>'l');
 
-    $svg = genererCarteSVG(800, 500, $liste_communes, 'commune', array(), array(), $objets);
+    $svg = genererCarteSVG(800, 500, $liste_communes, '', array(), array(), $objets);
 
     return $svg;
 }
