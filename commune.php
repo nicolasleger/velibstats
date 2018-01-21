@@ -1,4 +1,6 @@
 <?php
+echo $_GET['commune'];
+/*
 require_once('config.php');
 include_once('functions.php');
 
@@ -56,25 +58,8 @@ else
 
 		<p>
 		<?php
-
-$objets=array(
-array('nature'=>'texte','x'=>300,'y'=>30,'texte'=>'Stations Vélib’ dans la','taille'=>24,'couleur'=>'blue','align'=>'m','angle'=>0),
-array('nature'=>'texte','x'=>300,'y'=>60,'texte'=>'Métropole du Grand Paris','taille'=>24,'couleur'=>'blue','align'=>'m','angle'=>0),
-
-array('point'=>'carre','x'=>-18,'y'=>10,'taille'=>8,'couleur'=>'#008000','angle'=>45),
-array('point'=>'triangle','x'=>-38,'y'=>10,'taille'=>8,'couleur'=>'#800000','angle'=>90),
-
-array('nature'=>'texte','x'=>-20,'y'=>20,'texte'=>'Stations ouvertes','taille'=>12,'angle'=>90,'align'=>'l'),
-array('nature'=>'texte','x'=>-40,'y'=>20,'texte'=>'Stations fermées','taille'=>12,'angle'=>90,'align'=>'l'));
-
-
-
 		include('carte.php');
-		echo '**';
-		$svg=carte(800,600,75,'commune',array(),array(),$objets);
-
-		echo $svg;
-		echo '**';
+		carte(800,600,array(),array(),0,'a');
 		?>
 		</p>
 
@@ -159,3 +144,4 @@ array('nature'=>'texte','x'=>-40,'y'=>20,'texte'=>'Stations fermées','taille'=>
         </script>
     </body>
 </html>
+*/

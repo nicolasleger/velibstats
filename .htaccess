@@ -1,0 +1,12 @@
+#ErrorDocument 404 http://velib.nocle.fr
+
+#Options -Indexes
+
+RewriteEngine on
+
+#appel de la page "commune" pour les url commençant par "commune_00000"
+RewriteRule ^commune_([0-9]{5}).*$				commune.php?commune=$1 [L]
+
+#appel de la page "index" pour les url ne connerpondant pas à un pattern connu
+#RewriteRule ^$											index.php [L]
+
