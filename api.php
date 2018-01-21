@@ -122,6 +122,10 @@ switch($_GET['action'])
         echo json_encode(getDataStation($codeStation));
         exit();
         break;
+    case 'getCommunes':
+        echo json_encode(getCommunes($idConso));
+        exit();
+        break;
 }
 
 function getBikeInstantane($codeStation)
@@ -781,7 +785,9 @@ function getDataConso($idConso, $longitude = null, $latitude = null)
             'nbBike' => $station['nbBike'],
             'nbEbike' => $station['nbEBike'],
             'nbFreeEDock' => $station['nbFreeEDock'],
-            'nbEDock' => $station['nbEDock']
+            'nbEDock' => $station['nbEDock'],
+            'latitude' => $station['latitude'],
+            'longitude' => $station['longitude']
         );
     }
     return array('data' => $retour);
@@ -814,5 +820,92 @@ function getDataStation($codeStation)
         );
     }
     return array('data' => $retour);
+}
+
+function getCommunes($idConso)
+{
+    global $pdo;
+
+    $dataConso = getDataConso($idConso);
+    $statusStation = $dataConso['data'];
+
+    $liste_communes = array();
+    $objets = array();
+
+    define('ETAT_INCONNU', 0);
+    define('ETAT_TRAVAUX', 1);
+    define('ETAT_OUVERTE', 2);
+
+    foreach($statusStation as $station)
+    {
+        //interprétation de l'état de la station 0=état non prévu
+        switch($station['state'])
+        {
+            case 'Work in progress': 
+                $etat = ETAT_TRAVAUX; 
+                break;
+            case 'Operative': 
+                $etat = ETAT_OUVERTE; 
+                break;
+            default: 
+                $etat = ETAT_INCONNU;
+        }
+
+        //récupération de la commune correspondant à la station (d'après son numéro)
+        $res = $pdo->query('SELECT insee FROM tranche WHERE debut <= "'.$station['code'].'" AND fin >= "'.$station['code'].'"');
+        $ligne = $res->fetch();
+
+        //initialisation du nombre de stations + ajout à la liste des communes
+        if(!isset($nb_stations[$ligne['insee']]))
+        {
+            $liste_communes[] = $ligne['insee'];
+        }
+
+        if($etat == ETAT_INCONNU)
+        {
+            $objets[]=array(
+                        'nature'=>'point',
+                        'point'=>'rond',
+                        'taille'=>8,'couleur'=>'#000000',
+                        'lon'=>$station['longitude'],
+                        'lat'=>$station['latitude'],
+                        'lien'=>'station.php?code='.$station['code'],
+                        'info'=>'Station '.displayCodeStation($station['code'])."\n".$station['name'].'<br/>'."\n".'État inconnu');
+        }
+        else if($etat == ETAT_TRAVAUX)
+        {
+            $objets[]=array(
+                        'nature'=>'point',
+                        'point'=>'triangle',
+                        'taille'=>8,'couleur'=>'#800000',
+                        'lon'=>$station['longitude'],
+                        'lat'=>$station['latitude'],
+                        'lien'=>'station.php?code='.$station['code'],
+                        'info'=>'Station '.displayCodeStation($station['code'])."\n".$station['name'].'<br/>'."\n".'En travaux');
+        }
+        else if($etat == ETAT_OUVERTE)
+        {
+            $objets[]=array(
+                        'nature'=>'point',
+                        'point'=>'carre',
+                        'taille'=>6,'couleur'=>'#008000','angle'=>'45',
+                        'lon'=>$station['longitude'],
+                        'lat'=>$station['latitude'],
+                        'lien'=>'station.php?code='.$station['code'],
+                        'info'=>'Station '.displayCodeStation($station['code'])."\n".$station['name'].'<br/>'."\n".'En service');
+        }
+
+    }
+
+    //Légende
+    $objets[] = array('point'=>'carre','x'=>-18,'y'=>10,'taille'=>6,'couleur'=>'#008000','angle'=>45);
+    $objets[] = array('point'=>'triangle','x'=>-38,'y'=>10,'taille'=>8,'couleur'=>'#800000','angle'=>90);
+
+    $objets[] = array('nature'=>'texte','x'=>-20,'y'=>20,'texte'=>'Stations ouvertes','taille'=>12,'angle'=>90,'align'=>'l');
+    $objets[] = array('nature'=>'texte','x'=>-40,'y'=>20,'texte'=>'Stations fermées','taille'=>12,'angle'=>90,'align'=>'l');
+
+    $svg = genererCarteSVG(800, 600, $liste_communes, 'commune', array(), array(), $objets);
+
+    return $svg;
 }
 ?>
