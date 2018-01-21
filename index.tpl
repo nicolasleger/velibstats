@@ -118,7 +118,14 @@
                         return putZero(date.getDate()) + '/' + putZero(date.getMonth()+1) + '/' + date.getFullYear();
                     }
                 },{
-                    data: 'state'
+                    data: 'state',
+                    render: function(data, type, row, meta)
+                    {
+                        if(data == 'Operative' && row.nbEDock > 0)
+                            return 'Ouverte';
+                        else
+                            return 'En travaux';
+                    }
                 },{
                     data: 'nbBike'
                 },{

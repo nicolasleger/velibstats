@@ -781,7 +781,7 @@ function getDataConso($idConso, $longitude = null, $latitude = null)
             'codeStr' => displayCodeStation($station['code']),
             'name' => $station['name'],
             'dateOuverture' => is_null($station['dateOuverture']) ? 'Non ouvert' : $station['dateOuverture'],
-            'state' => (($station['state'] == 'Operative' && $station['nbEDock'] != 0) ? 'Ouverte' : 'En travaux'),
+            'state' => $station['state'],
             'nbBike' => $station['nbBike'],
             'nbEbike' => $station['nbEBike'],
             'nbFreeEDock' => $station['nbFreeEDock'],
@@ -841,10 +841,10 @@ function getCommunesCarte($idConso)
         //interprétation de l'état de la station 0=état non prévu
         switch($station['state'])
         {
-            case 'En travaux': 
+            case 'Work in progress': 
                 $etat = ETAT_TRAVAUX; 
                 break;
-            case 'Ouverte': 
+            case 'Operative': 
                 $etat = ETAT_OUVERTE; 
                 break;
             default: 
