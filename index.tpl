@@ -50,6 +50,11 @@
         <option value="toutes">Toutes</option>
         <option value="ouverte" selected>Ouverte</option>
         <option value="travaux">En travaux</option>
+    </select> - 
+    Position 
+    <select id="filtrePosition">
+        <option value="toutes" selected>Indifféramment</option>
+        <option value="proximite">À proximité</option>
     </select>
     <table id="stations">
         <thead>
@@ -126,7 +131,37 @@
             });
             filtreDataTable();
             $("#filtreEtat").change(filtreDataTable);
-        } );
+            $("#filtrePosition").change(filtrePosition);
+        });
+
+        function filtrePosition()
+        {
+            var valeur = $("#filtrePosition").val();
+            if(valeur == 'proximite')
+                obtenirLocalisation();
+            else
+                resetLocalisation();
+        }
+
+        function obtenirLocalisation()
+        {
+            if (navigator.geolocation)
+                navigator.geolocation.getCurrentPosition(traiterLocalisation);
+            else
+                alert("Votre navigateur ne supporte pas la fonction localisation");
+        }
+
+        function traiterLocalisation(position)
+        {
+            var dt = $('#stations').DataTable();
+            dt.ajax.url('api.php?action=getDataConso&idConso={$idConso}&lat='+position.coords.latitude+'&long='+position.coords.longitude).load();
+        }
+
+        function resetLocalisation()
+        {
+            var dt = $('#stations').DataTable();
+            dt.ajax.url('api.php?action=getDataConso&idConso={$idConso}').load();
+        }
     </script>
 </div>
 {include file="footer.tpl"}
