@@ -2,15 +2,32 @@
 <header>
     <h1>Vélib Stats (site non officiel)</h1>
 </header>
-<ul>
-    <li>Nombre de stations ouvertes annoncées (<abbr title="Stations affichées comme étant ouverte">définition</abbr>) : {$nbStation}</li>
-    <li>Nombre de stations ouvertes détectées (<abbr title="Stations avec un nombre de bornes positifs avec au moins un vélo ou une borne libre">définition</abbr>) : {$nbStationDetecte}</li>
-    <li>Nombre de vélos mécaniques disponible : {$nbBike}</li>
-    <li>Nombre de vélos électriques disponible : {$nbEbike}</li>
-    <li>Nombre de bornes libres : {$nbFreeEDock}</li>
-    <li>Nombre de bornes total : {$nbEDock}</li>
-</ul>
-<i>Dernière mise à jour : {$dateDerniereConso}</i><br />
+<div id="statsConsoArea">
+    <table id="statsConso">
+        <tr>
+            <th colspan="2">Stations ouvertes</th>
+            <th colspan="2">Vélos disponibles</th>
+            <th colspan="2">Bornes</th>
+        </tr>
+        <tr>
+            <td>{$nbStation}</td>
+            <td>{$nbStationDetecte}</td>
+            <td>{$nbBike}</td>
+            <td>{$nbEbike}</td>
+            <td>{$nbFreeEDock}</td>
+            <td>{$nbEDock}</td>
+        </tr>
+        <tr>
+            <td><abbr title="Stations affichées comme étant ouverte">annoncées</abbr></td>
+            <td><abbr title="Stations avec un nombre de bornes positifs avec au moins un vélo ou une borne libre">détectées</abbr></td>
+            <td>mécaniques</td>
+            <td>électriques</td>
+            <td>libres</td>
+            <td>totales</td>
+        </tr>
+    </table>
+    <i>Dernière mise à jour : {$dateDerniereConso}</i>
+</div>
 <select id="typeGraphiqueSelect" style="display: none">
     <option value="_double">Conso</option>
 </select>
@@ -20,9 +37,9 @@
     <option value="unJour">Un jour - Période de 15 minutes</option>
     <option value="septJours" selected>Une semaine - Période d'une heure</option>
     <option value="unMois">Un mois - Période de six heures</option>
-</select> Graphique issu du site velib.nocle.fr
+</select> Graphique issu du site velib.nocle.fr<br />
 <canvas id="chartNbStations" width="1000" height="400"></canvas>
-<canvas id="chartBikes" width="1000" height="400"></canvas>
+<canvas id="chartBikes" width="1000" height="400"></canvas><br />
 <i>Ce site n'est pas un site officiel de vélib métropole. Les données utilisées proviennent de <a href="http://www.velib-metropole.fr">www.velib-metropole.fr</a> et appartienne à leur propriétaire. - <a href="https://framagit.org/JonathanMM/velibstats">Site du projet</a> - 
 Auteur : JonathanMM (<a href="https://twitter.com/Jonamaths">@Jonamaths</a>)</i>
 <h2>Stations</h2>

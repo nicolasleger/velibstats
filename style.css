@@ -26,3 +26,26 @@ td
 {
     text-align: center;
 }
+
+#statsConsoArea
+{
+    text-align: center;
+}
+
+table#statsConso
+{
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+table#statsConso th, table#statsConso td
+{
+    padding: 0.25em;
+}
+
+table#statsConso tr:nth-child(2)
+{
+    font-weight: bold;
+    font-size: 2em;
+}
