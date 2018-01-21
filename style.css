@@ -49,3 +49,14 @@ table#statsConso tr:nth-child(2)
     font-weight: bold;
     font-size: 2em;
 }
+
+#chartArea
+{
+    display: flex;
+    max-height: 500px;
+}
+
+#content
+{
+    padding: 1em;
+}
