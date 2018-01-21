@@ -12,6 +12,15 @@ header
     padding: 1em;
 }
 
+header nav
+{
+    background-color: lightgreen;
+    margin-left: -1em;
+    margin-right: -1em;
+    padding: 0.5em 1em;
+    margin-top: 1em;
+}
+
 header h1
 {
     margin: 0px;
@@ -80,4 +89,9 @@ a
 a:hover
 {
     text-decoration: underline;
+}
+
+ul
+{
+    margin: 0px;
 }

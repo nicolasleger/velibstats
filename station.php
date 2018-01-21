@@ -27,6 +27,7 @@ if($station === false)
 }
 $smarty->assign(array(
     'stationCode' => $code,
+    'stationCodeDisplay' => displayCodeStation($code),
     'stationNom' => $station['name'],
     'stationDateOuverture' => (new DateTime($station['dateOuverture']))->format('d/m/Y'),
     'stationAdresse' => $station['adresse']
