@@ -57,8 +57,16 @@ function genererCarteSVG($largeur_carte=800,$hauteur_carte=600,$filtre=0,
 	//détermination de la liste des communes en fonction de l'argument "filtre"
 	if(is_array($filtre))
 	{
-		$liste_des_communes=implode(',',array_map('intval',$filtre));
-		$where=' WHERE insee IN ('.$liste_des_communes.')';
+		if(count($filtre))
+		{
+			$liste_des_communes=implode(',',array_map('intval',$filtre));
+			$where=' WHERE insee IN ('.$liste_des_communes.')';
+		}
+		else
+		{
+			$filtre==0;
+			$where='';
+		}
 	}
 	else if($filtre==0)
 		$where='';
@@ -199,7 +207,7 @@ function genererCarteSVG($largeur_carte=800,$hauteur_carte=600,$filtre=0,
 	$svg.='<g id="communes" transform="scale('.$largeur_f.','.$hauteur_f.') translate('.$dec_lon.','.$dec_lat.')">'."\n";
 
 	//style commun à tous les tracés de communes
-	$svg.="\t".'<g id="contour" style="stroke-width:'.$stroke.'; fill:#888888;">'."\n";
+	$svg.="\t".'<g id="contour" style="stroke-width:'.$stroke.'; fill:darkgray;">'."\n";
 
 	//affichage en premier (arrière-plan) des communes hors sélection (in=false)
 	$svg.="\t\t".'<g id="out" style="stroke:white; fill-opacity:0.4;">'."\n";
@@ -261,7 +269,7 @@ function genererCarteSVG($largeur_carte=800,$hauteur_carte=600,$filtre=0,
 
 	/****** AFFICHAGE DES OBJETS : CARACTERISTIQUES COMMUNES **********************/
 
-	if(count($objets))
+	if(is_array($objets)&&count($objets)>0)
 	{
 		$svg.='<g id="objets" style="stroke:none;">'."\n";
 
@@ -346,29 +354,69 @@ function genererCarteSVG($largeur_carte=800,$hauteur_carte=600,$filtre=0,
 
 					switch($objet['point'])
 					{
-						case 'triangle':	
+						case 'triangle':
 							$y1=$y-$objet['taille']*0.5774;
 							$y2=$y+$objet['taille']*0.2887;
 							$x2=$x+$objet['taille']*0.5;
 							$x3=$x-$objet['taille']*0.5;
 							$svg.="\t".'<polygon points="'.$x.' '.$y1.','.$x2.' '.$y2.','.$x3.' '.$y2.'" style="fill:'.$objet['couleur'].';"';
-							if($objet['angle']!=0) 
-								$svg.=' transform="rotate('.$objet['angle'].','.$x.','.$y.')"';
+							if($objet['angle']!=0) $svg.=' transform="rotate('.$objet['angle'].','.$x.','.$y.')"';
 							$svg.='/>'."\n";
 							break;
 						case 'carre':
 							$y1=$y-$objet['taille']*0.5;
 							$x1=$x-$objet['taille']*0.5;
 							$svg.="\t".'<rect x="'.$x1.'" y="'.$y1.'" width="'.$objet['taille'].'" height="'.$objet['taille'].'" style="fill:'.$objet['couleur'].';"';
-							if($objet['angle']!=0) 
-								$svg.=' transform="rotate('.$objet['angle'].','.$x.','.$y.')"';
+							if($objet['angle']!=0) $svg.=' transform="rotate('.$objet['angle'].','.$x.','.$y.')"';
 							$svg.='/>'."\n";
 							break;
-						default:
+						//point de type diagramme en camembert
+						case 'pie':
+							//si le diagramme n'a pas le format attendu, diagramme par défaut
+							if(!isset($objet['pie'])||count($objet['pie'])!=4||$objet['pie'][0]==0) $objet_pie=array(3,1,1,1);
+							$couleur=array(1=>'DodgerBlue','LimeGreen','chocolate');
+							//initialisation
 							$r=$objet['taille']*0.5;
-							$svg.="\t".'<circle cx="'.$x.'" cy="'.$y.'" r="'.$r.'" style="fill:'.$objet['couleur'].';"/>'."\n";
+							$a1=deg2rad(90);
+							$x1=$x;
+							$y1=$y-$r;
+
+							//pour chaque partie du diagramme (non vide)
+							for($i=1;$i<=3;$i++)
+							{
+								if($objet['pie'][$i])
+								{
+									$prop=$objet['pie'][$i]/$objet['pie'][0];
+									$a2=$a1-deg2rad(360*$prop);
+									$x2=$x+cos($a2)*$r;
+									$y2=$y-sin($a2)*$r;
+									//angle inférieur ou égal à 180°
+									if($prop<=0.5)
+									{
+										$svg.="\t".'<path d="M'.$x.' '.$y.'L'.$x1.' '.$y1.'A'.$r.' '.$r.' 0 0 1 '.$x2.' '.$y2.'Z" style="stroke:black; stroke-width:0.25; fill:'.$couleur[$i].';"/>'."\n";
+									}
+									//angle entre 180° et 360°
+									else if($prop<1)
+									{
+										$svg.="\t".'<path d="M'.$x.' '.$y.'L'.$x1.' '.$y1.'A'.$r.' '.$r.' 0 1 1 '.$x2.' '.$y2.'Z" style="stroke:black; stroke-width:0.25; fill:'.$couleur[$i].';"/>'."\n";
+									}
+									//cercle complet
+									else
+									{
+										$svg.="\t".'<circle cx="'.$x.'" cy="'.$y.'" r="'.$r.'" style="stroke:black; stroke-width:0.25; fill:'.$couleur[$i].';"/>'."\n";
+									}
+
+									$a1=$a2;
+									$x1=$x2;
+									$y1=$y2;
+								}
+							}
 							break;
-					}
+
+						default:			$r=$objet['taille']*0.5;
+											$svg.="\t".'<circle cx="'.$x.'" cy="'.$y.'" r="'.$r.'" style="fill:'.$objet['couleur'].';"/>'."\n";
+											break;
+						}
 					break;
 			}
 
