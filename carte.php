@@ -57,8 +57,16 @@ function carte($largeur_carte=800,$hauteur_carte=600,$filtre=0,
 //détermination de la liste des communes en fonction de l'argument "filtre"
 	if(is_array($filtre))
 		{
-		$liste_des_communes=implode(',',array_map('intval',$filtre));
-		$where=' WHERE insee IN ('.$liste_des_communes.')';
+		if(count($filtre))
+			{
+			$liste_des_communes=implode(',',array_map('intval',$filtre));
+			$where=' WHERE insee IN ('.$liste_des_communes.')';
+			}
+		else
+			{
+			$filtre==0;
+			$where='';
+			}
 		}
 	else if($filtre==0)
 		$where='';
@@ -73,6 +81,9 @@ function carte($largeur_carte=800,$hauteur_carte=600,$filtre=0,
 //entiers en 1/10 000 000 °de degré (précision d'environ 1cm)
 //longitude : 180°W = -1 800 000 000 ; 180°E = 1 800 000 000
 //latitude : 90°S = -900 000 000 ; 90°N = 900 000 000
+echo('SELECT MIN(ouest) AS W, MAX(est) AS E, MAX(nord) AS N,
+							MIN(sud) AS S FROM commune'.$where);
+
 	$requete=$pdo->query('SELECT MIN(ouest) AS W, MAX(est) AS E, MAX(nord) AS N,
 							MIN(sud) AS S FROM commune'.$where);
 	$ligne=$requete->fetch(PDO::FETCH_ASSOC);
