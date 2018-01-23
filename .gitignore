@@ -9,3 +9,4 @@ script/fixStation.py
 .vscode
 templates_c/*
 !templates_c/README.md
+script/fixInseeStation.py
