@@ -98,7 +98,8 @@ CREATE TABLE `stations` (
   `longitude` decimal(16,14) NOT NULL,
   `type` varchar(256) NOT NULL,
   `dateOuverture` date DEFAULT NULL,
-  `adresse` text
+  `adresse` text,
+  `insee` int(5) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
