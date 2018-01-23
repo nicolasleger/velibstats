@@ -905,13 +905,12 @@ function getCommunesCarte($idConso)
         $nombre_etat[$etat]++;
 
         //récupération de la commune correspondant à la station (d'après son numéro)
-        $res = $pdo->query('SELECT insee FROM tranche WHERE debut <= "'.$station['code'].'" AND fin >= "'.$station['code'].'"');
-        $ligne = $res->fetch();
+        $inseeCommune = getCommuneStation($station['code']);
 
         //ajout à la liste des communes
-        if(!in_array($ligne['insee'],$liste_communes))
+        if(!is_null($inseeCommune) && !in_array($inseeCommune,$liste_communes))
         {
-            $liste_communes[] = $ligne['insee'];
+            $liste_communes[] = $inseeCommune;
         }
 
         //texte en fonction du nombre de bornes

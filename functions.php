@@ -1,5 +1,5 @@
 <?php
-include('carte.php');
+include_once('carte.php');
 
 function displayCodeStation($code)
 {
@@ -8,4 +8,16 @@ function displayCodeStation($code)
     return $code;
 }
 
+function getCommuneStation($codeStation)
+{
+    global $pdo;
+
+    $res = $pdo->query('SELECT insee FROM tranche WHERE debut <= "'.$codeStation.'" AND fin >= "'.$codeStation.'"');
+    $ligne = $res->fetch();
+
+    if(is_null($ligne))
+        return null;
+    
+    return $ligne['insee'];
+}
 ?>
