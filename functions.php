@@ -12,7 +12,7 @@ function getCommuneStation($codeStation)
 {
     global $pdo;
 
-    $res = $pdo->query('SELECT insee FROM tranche WHERE debut <= "'.$codeStation.'" AND fin >= "'.$codeStation.'"');
+    $res = $pdo->query('SELECT insee FROM tranche WHERE debut <= '.$codeStation.' AND fin >= '.$codeStation);
     $ligne = $res->fetch();
 
     if(is_null($ligne))
