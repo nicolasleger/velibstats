@@ -20,4 +20,32 @@ function getCommuneStation($codeStation)
     
     return $ligne['insee'];
 }
+
+function getStatusByIdConso($idConso, $filtreWhere = null)
+{
+    global $pdo;
+    $requete = $pdo->query('SELECT * FROM status INNER JOIN `stations` ON stations.code = status.code WHERE idConso = '.$idConso.
+    (is_null($filtreWhere) ? '' : ' AND ('.$filtreWhere.')').' ORDER BY status.code ASC');
+    if($requete === false)
+        return null;
+    $data = $requete->fetchAll(PDO::FETCH_ASSOC);
+    $retour = [];
+    foreach($data as $station)
+    {
+        $retour[] = array(
+            'code' => $station['code'],
+            'codeStr' => displayCodeStation($station['code']),
+            'name' => $station['name'],
+            'dateOuverture' => is_null($station['dateOuverture']) ? 'Non ouvert' : $station['dateOuverture'],
+            'state' => $station['state'],
+            'nbBike' => $station['nbBike'],
+            'nbEbike' => $station['nbEBike'],
+            'nbFreeEDock' => $station['nbFreeEDock'],
+            'nbEDock' => $station['nbEDock'],
+            'latitude' => $station['latitude'],
+            'longitude' => $station['longitude']
+        );
+    }
+    return $retour;
+}
 ?>

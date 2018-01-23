@@ -761,36 +761,18 @@ function getDataConsoBikeResume($filtre, $periode)
 function getDataConso($idConso, $longitude = null, $latitude = null)
 {
     global $pdo;
-    $whereCoord = '';
+    $whereCoord = null;
     if(!is_null($longitude) && !is_null($latitude))
     {
-        $whereCoord = ' AND '.implode(' AND ', array(
+        $whereCoord = implode(' AND ', array(
             'stations.longitude >= '.($longitude - 0.015),
             'stations.longitude <= '.($longitude + 0.015),
             'stations.latitude >= '.($latitude - 0.01),
             'stations.latitude <= '.($latitude + 0.01)
         ));
     }
-    $requete = $pdo->query('SELECT * FROM status inner join `stations` on stations.code = status.code WHERE idConso = '.$idConso.$whereCoord.' order by status.code asc');
-    $data = $requete->fetchAll(PDO::FETCH_ASSOC);
-    $retour = [];
-    foreach($data as $station)
-    {
-        $retour[] = array(
-            'code' => $station['code'],
-            'codeStr' => displayCodeStation($station['code']),
-            'name' => $station['name'],
-            'dateOuverture' => is_null($station['dateOuverture']) ? 'Non ouvert' : $station['dateOuverture'],
-            'state' => $station['state'],
-            'nbBike' => $station['nbBike'],
-            'nbEbike' => $station['nbEBike'],
-            'nbFreeEDock' => $station['nbFreeEDock'],
-            'nbEDock' => $station['nbEDock'],
-            'latitude' => $station['latitude'],
-            'longitude' => $station['longitude']
-        );
-    }
-    return array('data' => $retour);
+
+    return array('data' => getStatusByIdConso($idConso, $whereCoord));
 }
 
 function getDataStation($codeStation)
