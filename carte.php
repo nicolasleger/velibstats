@@ -196,6 +196,10 @@ function genererCarteSVG($largeur_carte=800,$hauteur_carte=600,$filtre=0,
 	$svg.="\t".'a:focus {outline-style:none;}'."\n";
 	//la commune survolée est en surbrillance
 	$svg.="\t".'path:hover {fill-opacity:1;}'."\n";
+	$svg.="\t".'.d75, .d78 {fill:Khaki}'."\n";
+	$svg.="\t".'.d77, .d92 {fill:SkyBlue}'."\n";
+	$svg.="\t".'.d91, .d93 {fill:LightCoral}'."\n";
+	$svg.="\t".'.d94, .d95 {fill:GreenYellow}'."\n";
 	$svg.='</style>'."\n";
 
 	//fond de carte
@@ -210,7 +214,7 @@ function genererCarteSVG($largeur_carte=800,$hauteur_carte=600,$filtre=0,
 	$svg.="\t".'<g id="contour" style="stroke-width:'.$stroke.'; fill:darkgray;">'."\n";
 
 	//affichage en premier (arrière-plan) des communes hors sélection (in=false)
-	$svg.="\t\t".'<g id="out" style="stroke:white; fill-opacity:0.4;">'."\n";
+	$svg.="\t\t".'<g id="out" style="stroke:white; fill-opacity:0.25;">'."\n";
 
 	foreach($resultat AS $ligne)
 	{
@@ -226,8 +230,13 @@ function genererCarteSVG($largeur_carte=800,$hauteur_carte=600,$filtre=0,
 			}
 			//ajout du tracé de la commune
 			$svg.="\t\t\t".'<path ';
+
+			//couleur spécifiquement définie à défaut couleur du département
 			if(isset($couleur[$ligne['insee']]))
 				$svg.='style="fill:'.$couleur[$ligne['insee']].';" ';
+			else
+				$svg.='class="d'.floor($ligne['insee']/1000).'" ';
+
 			$svg.='d="M'.$ligne['contour'].'Z"/>'."\n";
 			//fermeture du lien s'il a été ouvert
 			if($liens!='')
@@ -237,7 +246,7 @@ function genererCarteSVG($largeur_carte=800,$hauteur_carte=600,$filtre=0,
 	$svg.="\t\t".'</g>'."\n";
 
 	//affichage en dernier (avant-plan) des communes en sélection (in=true)
-	$svg.="\t\t".'<g id="in" style="stroke:black; fill-opacity:0.6;">'."\n";
+	$svg.="\t\t".'<g id="in" style="stroke:black; fill-opacity:0.5;">'."\n";
 
 	foreach($resultat AS $ligne)
 	{
@@ -253,8 +262,13 @@ function genererCarteSVG($largeur_carte=800,$hauteur_carte=600,$filtre=0,
 			}
 			//ajout du tracé de la commune
 			$svg.="\t\t\t".'<path ';
+
+			//couleur spécifiquement définie à défaut couleur du département
 			if(isset($couleur[$ligne['insee']]))
 				$svg.='style="fill:'.$couleur[$ligne['insee']].';" ';
+			else
+				$svg.='class="d'.floor($ligne['insee']/1000).'" ';
+
 			$svg.='d="M'.$ligne['contour'].'Z"/>'."\n";
 			//fermeture du lien s'il a été ouvert
 			if($liens!='')
@@ -391,7 +405,7 @@ function genererCarteSVG($largeur_carte=800,$hauteur_carte=600,$filtre=0,
 									$x2=$x+cos($a2)*$r;
 									$y2=$y-sin($a2)*$r;
 									//angle inférieur ou égal à 180°
-									if($prop<=0.5)
+									if($prop<0.5)
 									{
 										$svg.="\t".'<path d="M'.$x.' '.$y.'L'.$x1.' '.$y1.'A'.$r.' '.$r.' 0 0 1 '.$x2.' '.$y2.'Z" style="stroke:black; stroke-width:0.25; fill:'.$couleur[$i].';"/>'."\n";
 									}
