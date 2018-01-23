@@ -964,7 +964,7 @@ function getCommunesCarte($idConso)
                         'texte'=>'Stations en service ('.$nombre_etat[BORNES_OUI+ETAT_OUVERTE].')');
     }
 
-    $svg = genererCarteSVG(800, 500, $liste_communes, '', '', '', $objets);
+    $svg = genererCarteSVG(800, 500, $liste_communes, 'commune.php?insee=', '', '', $objets);
 
     return $svg;
 }

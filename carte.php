@@ -223,7 +223,7 @@ function genererCarteSVG($largeur_carte=800,$hauteur_carte=600,$filtre=0,
 			//ajout du lien s'il est défini
 			if($liens!='')
 			{
-				$svg.="\t\t\t".'<a xlink:href="'.$liens.'_'.$ligne['insee'].'_'.$ligne['nom'].'">'."\n";
+				$svg.="\t\t\t".'<a xlink:href="'.$liens.$ligne['insee'].'">'."\n";
 				//ajout de l'info-bulle si elle est définie (il faut que le lien soit défini)
 				if(isset($info[$ligne['insee']]))
 					$svg.="\t\t\t".'<title>'.$ligne['nom_complet'].' '.$info[$ligne['insee']].'</title>'."\n";
@@ -255,7 +255,7 @@ function genererCarteSVG($largeur_carte=800,$hauteur_carte=600,$filtre=0,
 			//ajout du lien s'il est défini
 			if($liens!='')
 			{
-				$svg.="\t\t\t".'<a xlink:href="'.$liens.'_'.$ligne['insee'].'_'.$ligne['nom'].'">'."\n";
+				$svg.="\t\t\t".'<a xlink:href="'.$liens.$ligne['insee'].'">'."\n";
 				//ajout de l'info-bulle si elle est définie (il faut que le lien soit défini)
 				if(isset($info[$ligne['insee']]))
 					$svg.="\t\t\t".'<title>'.$ligne['nom_complet'].' '.$info[$ligne['insee']].'</title>'."\n";
