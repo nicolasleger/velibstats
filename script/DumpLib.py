@@ -10,7 +10,8 @@ def creerStationTable(c):
     `longitude` decimal(16,14) NOT NULL,
     `type` varchar(256) NOT NULL,
     `dateOuverture` date DEFAULT NULL,
-    `adresse` text
+    `adresse` text,
+    `insee` int(5) DEFAULT NULL
     );
     ''')
 
@@ -23,13 +24,13 @@ def creerStationData(conn, mysql):
     c = conn.cursor()
     requete = mysql.cursor()
     requete.execute('''
-    SELECT code, name, latitude, longitude, type, dateOuverture, adresse
+    SELECT code, name, latitude, longitude, type, dateOuverture, adresse, insee
     FROM stations
     ''')
     stations = requete.fetchall()
     for station in stations:
-        c.execute('INSERT INTO stations (code, name, latitude, longitude, type, dateOuverture, adresse) VALUES \
-        ('+str(station[0])+', "'+str(station[1])+'", '+str(station[2])+', '+str(station[3])+', "'+str(station[4])+'", '+val(station[5])+', "'+str(station[6])+'")')
+        c.execute('INSERT INTO stations (code, name, latitude, longitude, type, dateOuverture, adresse, insee) VALUES \
+        ('+str(station[0])+', "'+str(station[1])+'", '+str(station[2])+', '+str(station[3])+', "'+str(station[4])+'", '+val(station[5])+', "'+str(station[6])+'", '+val(station[7])+')')
     conn.commit()
 
 def creerDumpData(dateDebut):

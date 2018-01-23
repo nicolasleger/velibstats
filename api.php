@@ -761,36 +761,18 @@ function getDataConsoBikeResume($filtre, $periode)
 function getDataConso($idConso, $longitude = null, $latitude = null)
 {
     global $pdo;
-    $whereCoord = '';
+    $whereCoord = null;
     if(!is_null($longitude) && !is_null($latitude))
     {
-        $whereCoord = ' AND '.implode(' AND ', array(
+        $whereCoord = implode(' AND ', array(
             'stations.longitude >= '.($longitude - 0.015),
             'stations.longitude <= '.($longitude + 0.015),
             'stations.latitude >= '.($latitude - 0.01),
             'stations.latitude <= '.($latitude + 0.01)
         ));
     }
-    $requete = $pdo->query('SELECT * FROM status inner join `stations` on stations.code = status.code WHERE idConso = '.$idConso.$whereCoord.' order by status.code asc');
-    $data = $requete->fetchAll(PDO::FETCH_ASSOC);
-    $retour = [];
-    foreach($data as $station)
-    {
-        $retour[] = array(
-            'code' => $station['code'],
-            'codeStr' => displayCodeStation($station['code']),
-            'name' => $station['name'],
-            'dateOuverture' => is_null($station['dateOuverture']) ? 'Non ouvert' : $station['dateOuverture'],
-            'state' => $station['state'],
-            'nbBike' => $station['nbBike'],
-            'nbEbike' => $station['nbEBike'],
-            'nbFreeEDock' => $station['nbFreeEDock'],
-            'nbEDock' => $station['nbEDock'],
-            'latitude' => $station['latitude'],
-            'longitude' => $station['longitude']
-        );
-    }
-    return array('data' => $retour);
+
+    return array('data' => getStatusByIdConso($idConso, $whereCoord));
 }
 
 function getDataStation($codeStation)
@@ -905,13 +887,12 @@ function getCommunesCarte($idConso)
         $nombre_etat[$etat]++;
 
         //récupération de la commune correspondant à la station (d'après son numéro)
-        $res = $pdo->query('SELECT insee FROM tranche WHERE debut <= "'.$station['code'].'" AND fin >= "'.$station['code'].'"');
-        $ligne = $res->fetch();
+        $inseeCommune = getCommuneStation($station['code']);
 
         //ajout à la liste des communes
-        if(!in_array($ligne['insee'],$liste_communes))
+        if(!is_null($inseeCommune) && !in_array($inseeCommune,$liste_communes))
         {
-            $liste_communes[] = $ligne['insee'];
+            $liste_communes[] = $inseeCommune;
         }
 
         //texte en fonction du nombre de bornes
@@ -983,7 +964,7 @@ function getCommunesCarte($idConso)
                         'texte'=>'Stations en service ('.$nombre_etat[BORNES_OUI+ETAT_OUVERTE].')');
     }
 
-    $svg = genererCarteSVG(800, 500, $liste_communes, '', '', '', $objets);
+    $svg = genererCarteSVG(800, 500, $liste_communes, 'commune.php?insee=', '', '', $objets);
 
     return $svg;
 }

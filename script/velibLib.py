@@ -1,7 +1,7 @@
 import urllib.request, json, os, pymysql
 from datetime import datetime
 from config import getMysqlConnection, getURLVelib
-from adresseLib import getAdresse
+from adresseLib import getAdresse, getInsee
 
 def getAllStation():
     mysql = getMysqlConnection()
@@ -48,8 +48,8 @@ def getAllStation():
                 else:
                     strDateOuverture = 'CURDATE()'
                 requete = mysql.cursor()
-                requete.execute('INSERT INTO stations (code, name, longitude, latitude, type, dateOuverture, adresse) VALUES \
-                ('+str(codeStation)+', "'+str(infoStation['name'])+'", '+str(longitude)+', '+str(latitude)+', "'+str(infoStation['type'])+'", '+strDateOuverture+', "'+getAdresse(latitude, longitude)+'")')
+                requete.execute('INSERT INTO stations (code, name, longitude, latitude, type, dateOuverture, adresse, insee) VALUES \
+                ('+str(codeStation)+', "'+str(infoStation['name'])+'", '+str(longitude)+', '+str(latitude)+', "'+str(infoStation['type'])+'", '+strDateOuverture+', "'+getAdresse(latitude, longitude)+'", '+str(getInsee(codeStation))+')')
                 stations.append(codeStation)
             
             #Et on prend les infos de l'état actuel de la station
