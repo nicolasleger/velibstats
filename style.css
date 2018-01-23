@@ -59,9 +59,13 @@ table#statsConso tr:nth-child(2)
     font-size: 2em;
 }
 
-#chartArea
+#chartArea, #statsCarteArea
 {
     display: flex;
+}
+
+#chartArea
+{
     max-height: 500px;
 }
 
@@ -94,4 +98,9 @@ a:hover
 ul
 {
     margin: 0px;
+}
+
+#carteArea
+{
+    margin-left: 2em;
 }

@@ -1,4 +1,5 @@
 <?php
+include('carte.php');
 
 function displayCodeStation($code)
 {
@@ -6,3 +7,5 @@ function displayCodeStation($code)
         return '0'.$code;
     return $code;
 }
+
+?>

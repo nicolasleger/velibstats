@@ -3,31 +3,34 @@
     <h1>Vélib Stats (site non officiel)</h1>
 </header>
 <div id="content">
-    <div id="statsConsoArea">
-        <table id="statsConso">
-            <tr>
-                <th colspan="2">Stations ouvertes</th>
-                <th colspan="2">Vélos disponibles</th>
-                <th colspan="2">Bornes</th>
-            </tr>
-            <tr>
-                <td>{$nbStation}</td>
-                <td>{$nbStationDetecte}</td>
-                <td>{$nbBike}</td>
-                <td>{$nbEbike}</td>
-                <td>{$nbFreeEDock}</td>
-                <td>{$nbEDock}</td>
-            </tr>
-            <tr>
-                <td><abbr title="Stations affichées comme étant ouverte">annoncées</abbr></td>
-                <td><abbr title="Stations avec un nombre de bornes positifs avec au moins un vélo ou une borne libre">détectées</abbr></td>
-                <td>mécaniques</td>
-                <td>électriques</td>
-                <td>libres</td>
-                <td>totales</td>
-            </tr>
-        </table>
-        <i>Dernière mise à jour : {$dateDerniereConso}</i>
+    <div id="statsCarteArea">
+        <div id="statsConsoArea">
+            <table id="statsConso">
+                <tr>
+                    <th colspan="2">Stations ouvertes</th>
+                    <th colspan="2">Vélos disponibles</th>
+                    <th colspan="2">Bornes</th>
+                </tr>
+                <tr>
+                    <td>{$nbStation}</td>
+                    <td>{$nbStationDetecte}</td>
+                    <td>{$nbBike}</td>
+                    <td>{$nbEbike}</td>
+                    <td>{$nbFreeEDock}</td>
+                    <td>{$nbEDock}</td>
+                </tr>
+                <tr>
+                    <td><abbr title="Stations affichées comme étant ouverte">annoncées</abbr></td>
+                    <td><abbr title="Stations avec un nombre de bornes positifs avec au moins un vélo ou une borne libre">détectées</abbr></td>
+                    <td>mécaniques</td>
+                    <td>électriques</td>
+                    <td>libres</td>
+                    <td>totales</td>
+                </tr>
+            </table>
+            <i>Dernière mise à jour : {$dateDerniereConso}</i>
+        </div>
+        <div id="carteArea"></div>
     </div>
     <select id="typeGraphiqueSelect" style="display: none">
         <option value="_double">Conso</option>
@@ -115,7 +118,14 @@
                         return putZero(date.getDate()) + '/' + putZero(date.getMonth()+1) + '/' + date.getFullYear();
                     }
                 },{
-                    data: 'state'
+                    data: 'state',
+                    render: function(data, type, row, meta)
+                    {
+                        if(data == 'Operative' && row.nbEDock > 0)
+                            return 'Ouverte';
+                        else
+                            return 'En travaux';
+                    }
                 },{
                     data: 'nbBike'
                 },{
@@ -132,6 +142,7 @@
             filtreDataTable();
             $("#filtreEtat").change(filtreDataTable);
             $("#filtrePosition").change(filtrePosition);
+            recupererCarte();
         });
 
         function filtrePosition()
@@ -161,6 +172,13 @@
         {
             var dt = $('#stations').DataTable();
             dt.ajax.url('api.php?action=getDataConso&idConso={$idConso}').load();
+        }
+
+        function recupererCarte()
+        {
+            getData('api.php?action=getCommunesCarte&idConso={$idConso}').then(function(svg) {
+                $("#carteArea").html(svg);
+            });
         }
     </script>
 </div>

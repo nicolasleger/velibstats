@@ -122,6 +122,10 @@ switch($_GET['action'])
         echo json_encode(getDataStation($codeStation));
         exit();
         break;
+    case 'getCommunesCarte':
+        echo json_encode(getCommunesCarte($idConso));
+        exit();
+        break;
 }
 
 function getBikeInstantane($codeStation)
@@ -761,10 +765,10 @@ function getDataConso($idConso, $longitude = null, $latitude = null)
     if(!is_null($longitude) && !is_null($latitude))
     {
         $whereCoord = ' AND '.implode(' AND ', array(
-            'stations.longitude >= '.($longitude - 0.015),       
-            'stations.longitude <= '.($longitude + 0.015),       
-            'stations.latitude >= '.($latitude - 0.01),       
-            'stations.latitude <= '.($latitude + 0.01)       
+            'stations.longitude >= '.($longitude - 0.015),
+            'stations.longitude <= '.($longitude + 0.015),
+            'stations.latitude >= '.($latitude - 0.01),
+            'stations.latitude <= '.($latitude + 0.01)
         ));
     }
     $requete = $pdo->query('SELECT * FROM status inner join `stations` on stations.code = status.code WHERE idConso = '.$idConso.$whereCoord.' order by status.code asc');
@@ -777,11 +781,13 @@ function getDataConso($idConso, $longitude = null, $latitude = null)
             'codeStr' => displayCodeStation($station['code']),
             'name' => $station['name'],
             'dateOuverture' => is_null($station['dateOuverture']) ? 'Non ouvert' : $station['dateOuverture'],
-            'state' => (($station['state'] == 'Operative' && $station['nbEDock'] != 0) ? 'Ouverte' : 'En travaux'),
+            'state' => $station['state'],
             'nbBike' => $station['nbBike'],
             'nbEbike' => $station['nbEBike'],
             'nbFreeEDock' => $station['nbFreeEDock'],
-            'nbEDock' => $station['nbEDock']
+            'nbEDock' => $station['nbEDock'],
+            'latitude' => $station['latitude'],
+            'longitude' => $station['longitude']
         );
     }
     return array('data' => $retour);
@@ -814,5 +820,171 @@ function getDataStation($codeStation)
         );
     }
     return array('data' => $retour);
+}
+
+function getCommunesCarte($idConso)
+{
+    global $pdo;
+
+    $dataConso = getDataConso($idConso);
+    $statusStation = $dataConso['data'];
+
+    $liste_communes = array();
+    $objets = array();
+
+    define('ETAT_INCONNU', 0);
+    define('ETAT_TRAVAUX', 1);
+    define('ETAT_OUVERTE', 2);
+
+    define('BORNES_NON', 10);
+    define('BORNES_OUI', 20);
+
+    $couleur_etat=array(
+        BORNES_NON+ETAT_INCONNU=>'mediumvioletred',
+        BORNES_NON+ETAT_TRAVAUX=>'darkred',
+        BORNES_NON+ETAT_OUVERTE=>'slateblue',
+        BORNES_OUI+ETAT_INCONNU=>'indigo',
+        BORNES_OUI+ETAT_TRAVAUX=>'darkorange',
+        BORNES_OUI+ETAT_OUVERTE=>'darkgreen'
+    );
+
+    $nombre_etat=array(
+        BORNES_NON+ETAT_INCONNU=>0,
+        BORNES_NON+ETAT_TRAVAUX=>0,
+        BORNES_NON+ETAT_OUVERTE=>0,
+        BORNES_OUI+ETAT_INCONNU=>0,
+        BORNES_OUI+ETAT_TRAVAUX=>0,
+        BORNES_OUI+ETAT_OUVERTE=>0
+    );
+
+    foreach($statusStation as $station)
+    {
+        //interprétation de l'état de la station 0=état non prévu
+        switch($station['state'])
+        {
+            case 'Work in progress':
+                $etat = ETAT_TRAVAUX;
+                break;
+            case 'Operative': 
+                $etat = ETAT_OUVERTE;
+                break;
+            default: 
+                $etat = ETAT_INCONNU;
+        }
+
+        //forme en fonction de l'état annoncé
+        if($etat == ETAT_INCONNU)
+        {
+            $s_point='rond';
+            $s_taille=6;
+            $s_angle=0;
+            $s_info1='État inconnu';
+        }
+        else if($etat == ETAT_TRAVAUX)
+        {
+            $s_point='triangle';
+            $s_taille=8;
+            $s_angle=0;
+            $s_info1='En travaux';
+        }
+        else if($etat == ETAT_OUVERTE)
+        {
+            $s_point='carre';
+            $s_taille=6;
+            $s_angle=45;
+            $s_info1='En service';
+        }
+
+        //présence de bornes actives ?
+        if($station['nbEDock']!=0)
+            $etat+=BORNES_OUI;
+        else
+            $etat+=BORNES_NON;
+
+        //comptage du nombre de stations par etat
+        $nombre_etat[$etat]++;
+
+        //récupération de la commune correspondant à la station (d'après son numéro)
+        $res = $pdo->query('SELECT insee FROM tranche WHERE debut <= "'.$station['code'].'" AND fin >= "'.$station['code'].'"');
+        $ligne = $res->fetch();
+
+        //ajout à la liste des communes
+        if(!in_array($ligne['insee'],$liste_communes))
+        {
+            $liste_communes[] = $ligne['insee'];
+        }
+
+        //texte en fonction du nombre de bornes
+        switch($station['nbEDock'])
+        {
+            case 0:     $s_info2='aucune borne';
+                        break;
+            case 1:     $s_info2='1 borne';
+                        break;
+            default:    $s_info2=$station['nbEDock'].' bornes';
+                        break;
+        }
+
+        $objets[]=array(
+            'nature'=>'point',
+            'point'=>$s_point,
+            'taille'=>$s_taille,
+            'angle'=>$s_angle,
+            'couleur'=>$couleur_etat[$etat],
+            'lon'=>$station['longitude'],
+            'lat'=>$station['latitude'],
+            'lien'=>'station.php?code='.$station['code'],
+            'info'=>'Station '.sprintf('%05d',$station['code'])."\n".$station['name']."\n".$s_info1.' - '.$s_info2
+            );
+
+    }
+
+    //légende (point et texte, affiché uniquement pour les états ayant au moins une station
+    if($nombre_etat[BORNES_NON+ETAT_INCONNU])
+    {
+        $objets[]=array('point'=>'rond','x'=>-58,'y'=>10,'taille'=>6,'angle'=>0,
+                        'couleur'=>$couleur_etat[BORNES_NON+ETAT_INCONNU]);
+        $objets[]=array('nature'=>'texte','x'=>-60,'y'=>20,'taille'=>12,'angle'=>90,'align'=>'l',
+                        'texte'=>'Inconnu sans borne ('.$nombre_etat[BORNES_NON+ETAT_INCONNU].')');
+    }
+    if($nombre_etat[BORNES_NON+ETAT_TRAVAUX])
+    {
+        $objets[]=array('point'=>'triangle','x'=>-38,'y'=>10,'taille'=>8,'angle'=>90,
+                        'couleur'=>$couleur_etat[BORNES_NON+ETAT_TRAVAUX]);
+        $objets[]=array('nature'=>'texte','x'=>-40,'y'=>20,'taille'=>12,'angle'=>90,'align'=>'l',
+                        'texte'=>'Stations en travaux ('.$nombre_etat[BORNES_NON+ETAT_TRAVAUX].')');
+    }
+    if($nombre_etat[BORNES_NON+ETAT_OUVERTE])
+    {
+        $objets[]=array('point'=>'carre','x'=>-18,'y'=>210,'taille'=>6,'angle'=>45,
+                        'couleur'=>$couleur_etat[BORNES_NON+ETAT_OUVERTE]);
+        $objets[]=array('nature'=>'texte','x'=>-20,'y'=>220,'taille'=>12,'angle'=>90,'align'=>'l',
+                        'texte'=>'En service sans borne ('.$nombre_etat[BORNES_NON+ETAT_OUVERTE].')');
+    }
+    if($nombre_etat[BORNES_OUI+ETAT_INCONNU])
+    {
+        $objets[]=array('point'=>'rond','x'=>-58,'y'=>210,'taille'=>6,'angle'=>0,
+                        'couleur'=>$couleur_etat[BORNES_OUI+ETAT_INCONNU]);
+        $objets[]=array('nature'=>'texte','x'=>-60,'y'=>220,'taille'=>12,'angle'=>90,'align'=>'l',
+                        'texte'=>'Inconnu avec bornes ('.$nombre_etat[BORNES_OUI+ETAT_INCONNU].')');
+    }
+    if($nombre_etat[BORNES_OUI+ETAT_TRAVAUX])
+    {
+        $objets[]=array('point'=>'triangle','x'=>-38,'y'=>210,'taille'=>8,'angle'=>90,
+                        'couleur'=>$couleur_etat[BORNES_OUI+ETAT_TRAVAUX]);
+        $objets[]=array('nature'=>'texte','x'=>-40,'y'=>220,'taille'=>12,'angle'=>90,'align'=>'l',
+                        'texte'=>'En travaux avec bornes ('.$nombre_etat[BORNES_OUI+ETAT_TRAVAUX].')');
+    }
+    if($nombre_etat[BORNES_OUI+ETAT_OUVERTE])
+    {
+        $objets[]=array('point'=>'carre','x'=>-18,'y'=>10,'taille'=>6,'angle'=>45,
+                        'couleur'=>$couleur_etat[BORNES_OUI+ETAT_OUVERTE]);
+        $objets[]=array('nature'=>'texte','x'=>-20,'y'=>20,'taille'=>12,'angle'=>90,'align'=>'l',
+                        'texte'=>'Stations en service ('.$nombre_etat[BORNES_OUI+ETAT_OUVERTE].')');
+    }
+
+    $svg = genererCarteSVG(800, 500, $liste_communes, '', '', '', $objets);
+
+    return $svg;
 }
 ?>
