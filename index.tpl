@@ -29,6 +29,15 @@
                 </tr>
             </table>
             <i>Dernière mise à jour : {$dateDerniereConso}</i>
+            <form method="GET" action="commune.php">
+                <label for="insee">Filtrer par commune :</label> 
+                <select name="insee">
+                    {foreach $communes as $commune}
+                        <option value="{$commune.insee}">{$commune.nom_complet}</option>
+                    {/foreach}
+                </select>
+                <input type="submit" value="Filtrer" />
+            </form>
         </div>
         <div id="carteArea"></div>
     </div>

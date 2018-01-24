@@ -2,7 +2,7 @@ body
 {
     padding: 0px;
     margin: 0px;
-    font-family: Ubuntu, "Sans Serif";
+    font-family: Ubuntu, Verdana, Geneva, Tahoma, sans-serif;
 }
 
 header
@@ -62,11 +62,7 @@ table#statsConso tr:nth-child(2)
 #chartArea, #statsCarteArea
 {
     display: flex;
-}
-
-#chartArea
-{
-    max-height: 500px;
+    flex-wrap: wrap;
 }
 
 #content

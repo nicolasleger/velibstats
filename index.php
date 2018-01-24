@@ -24,6 +24,14 @@ $smarty->assign(array(
     'dateDerniereConso' => (new DateTime($conso['date']))->format('d/m/Y à H:i')
 ));
 
+//On récupère les communes
+$requete = $pdo->query('SELECT insee, nom_complet FROM commune');
+$communes = $requete->fetchAll(PDO::FETCH_ASSOC);
+
+$smarty->assign(array(
+    'communes' => $communes
+));
+
 $smarty->display('index.tpl');
 exit();
 ?>
