@@ -167,7 +167,8 @@ ALTER TABLE `signalement`
 -- Index pour la table `stations`
 --
 ALTER TABLE `stations`
-  ADD PRIMARY KEY (`code`);
+  ADD PRIMARY KEY (`code`),
+  ADD KEY `insee` (`insee`);
 
 --
 -- Index pour la table `status`
