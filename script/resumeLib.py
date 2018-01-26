@@ -28,7 +28,6 @@ def calculerResume(dateConsoDT, dureeConso):
                     precedents[codeStation] = {}
                 precedents[codeStation][cle] = valeurProp
 
-
     requete = mysql.cursor()
     requete.execute("SELECT s.code, s."+', s.'.join(proprietes)+" \
     FROM status s \
@@ -44,12 +43,12 @@ def calculerResume(dateConsoDT, dureeConso):
             if cle in ['nbEDock', 'maxBikeOverflow']:
                 bikeList[codeStation][cle] = valeurProp
             else:
-                if not codeStation in bikeList:
+                if codeStation not in bikeList:
                     bikeList[codeStation] = {cle: {'data': [], 'min': valeurProp, 'max': valeurProp}}
                     if cle in ['nbBike', 'nbEBike']:
                         bikeList[codeStation][cle]['pris'] = 0
                         bikeList[codeStation][cle]['remis'] = 0
-                elif not cle in bikeList[codeStation]:
+                elif cle not in bikeList[codeStation]:
                     bikeList[codeStation][cle] = {'data': [], 'min': valeurProp, 'max': valeurProp}
                     if cle in ['nbBike', 'nbEBike']:
                         bikeList[codeStation][cle]['pris'] = 0
@@ -59,10 +58,10 @@ def calculerResume(dateConsoDT, dureeConso):
                     bikeList[codeStation][cle]['min'] = min(bikeList[codeStation][cle]['min'], valeurProp)
                 
                 if cle in ['nbBike', 'nbEBike']:
-                    if not codeStation in precedents:
+                    if codeStation not in precedents:
                         precedents[codeStation] = {}
 
-                    if len(bikeList[codeStation][cle]['data']) > 0 and cle in precedents[codeStation]:
+                    if cle in precedents[codeStation]:
                         delta = valeurProp - precedents[codeStation][cle]
                         if delta > 0:
                             bikeList[codeStation][cle]['remis'] += delta  
