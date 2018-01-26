@@ -143,6 +143,14 @@
                     data: 'nbFreeEDock',
                     render: function(data, type, row, meta)
                     {
+                        if(type == 'sort') //Pour le tri, on utilise le nombre de bornes libres directement
+                        {
+                            if(data < 10)
+                                return '00' + data.toString();
+                            if(data < 100)
+                                return '0' + data.toString();
+                            return data;
+                        }
                         return data+'/'+row.nbEDock;
                     }
                 }],
