@@ -39,7 +39,7 @@ def getAllStation():
     for etatStation in data:
         infoStation = etatStation['station']
         codeStation = int(infoStation['code'])
-        if codeStation > 0:
+        if codeStation > 100:
             if codeStation not in stations:
                 longitude = infoStation['gps']['longitude']
                 latitude = infoStation['gps']['latitude']
@@ -51,37 +51,30 @@ def getAllStation():
                 requete.execute('INSERT INTO stations (code, name, longitude, latitude, type, dateOuverture, adresse, insee) VALUES \
                 ('+str(codeStation)+', "'+str(infoStation['name'])+'", '+str(longitude)+', '+str(latitude)+', "'+str(infoStation['type'])+'", '+strDateOuverture+', "'+getAdresse(latitude, longitude)+'", '+str(getInsee(codeStation))+')')
                 stations.append(codeStation)
-            
-            #Et on prend les infos de l'état actuel de la station
-            ok = True
-            if infoStation['state'] == 'Work in progress' and codeStation == 10006:
-                #Exception pour le moment sur cette station
-                ok = False
 
-            if ok:
-                nbBike = int(etatStation['nbBike'])
-                nbEbike = int(etatStation['nbEbike'])
-                nbFreeEDock = int(etatStation['nbFreeDock'])+int(etatStation['nbFreeEDock'])
-                nbEDock = int(etatStation['nbDock'])+int(etatStation['nbEDock'])
+            nbBike = int(etatStation['nbBike'])
+            nbEbike = int(etatStation['nbEbike'])
+            nbFreeEDock = int(etatStation['nbFreeDock'])+int(etatStation['nbFreeEDock'])
+            nbEDock = int(etatStation['nbDock'])+int(etatStation['nbEDock'])
+            requete = mysql.cursor()
+            requete.execute('INSERT INTO status (code, idConso, state, nbBike, nbEBike, nbFreeEDock, nbEDock, nbBikeOverflow, nbEBikeOverflow, maxBikeOverflow) VALUES \
+            ('+str(codeStation)+', '+strIdConso+', "'+str(infoStation['state'])+'", '+str(nbBike)+', '+str(nbEbike)+', '+str(nbFreeEDock)+', '+str(nbEDock)+', '+str(etatStation['nbBikeOverflow'])+', '+str(etatStation['nbEBikeOverflow'])+', '+str(etatStation['maxBikeOverflow'])+')')
+
+            #On met à jour la station au besoin
+            if codeStation in stationsFutur and nbEDock > 0:
                 requete = mysql.cursor()
-                requete.execute('INSERT INTO status (code, idConso, state, nbBike, nbEBike, nbFreeEDock, nbEDock, nbBikeOverflow, nbEBikeOverflow, maxBikeOverflow) VALUES \
-                ('+str(codeStation)+', '+strIdConso+', "'+str(infoStation['state'])+'", '+str(nbBike)+', '+str(nbEbike)+', '+str(nbFreeEDock)+', '+str(nbEDock)+', '+str(etatStation['nbBikeOverflow'])+', '+str(etatStation['nbEBikeOverflow'])+', '+str(etatStation['maxBikeOverflow'])+')')
+                requete.execute('UPDATE stations \
+                SET dateOuverture = CURDATE() WHERE code = '+str(codeStation))
 
-                #On met à jour la station au besoin
-                if codeStation in stationsFutur and nbEDock > 0:
-                    requete = mysql.cursor()
-                    requete.execute('UPDATE stations \
-                    SET dateOuverture = CURDATE() WHERE code = '+str(codeStation))
-
-                #On ajoute a la conso
-                nbTotalBike += nbBike
-                nbTotalEBike += nbEbike
-                nbTotalFreeEDock += nbFreeEDock
-                nbTotalEDock += nbEDock
-                if infoStation['state'] == "Operative":
-                    nbStationsOuvertes += 1
-                if nbEDock > 0 and nbBike + nbEbike + nbFreeEDock > 0:
-                    nbStationsOuvertesDetectees += 1
+            #On ajoute a la conso
+            nbTotalBike += nbBike
+            nbTotalEBike += nbEbike
+            nbTotalFreeEDock += nbFreeEDock
+            nbTotalEDock += nbEDock
+            if infoStation['state'] == "Operative":
+                nbStationsOuvertes += 1
+            if nbEDock > 0 and nbBike + nbEbike + nbFreeEDock > 0:
+                nbStationsOuvertesDetectees += 1
     os.remove(tmpFileName)
 
     #On insert tout dans le statut
