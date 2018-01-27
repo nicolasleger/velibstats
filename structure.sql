@@ -175,7 +175,8 @@ ALTER TABLE `stations`
 --
 ALTER TABLE `status`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `station` (`code`);
+  ADD KEY `station` (`code`),
+  ADD KEY `idConso` (`idConso`);
 
 --
 -- Index pour la table `statusConso`
