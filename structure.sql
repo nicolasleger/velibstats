@@ -167,14 +167,16 @@ ALTER TABLE `signalement`
 -- Index pour la table `stations`
 --
 ALTER TABLE `stations`
-  ADD PRIMARY KEY (`code`);
+  ADD PRIMARY KEY (`code`),
+  ADD KEY `insee` (`insee`);
 
 --
 -- Index pour la table `status`
 --
 ALTER TABLE `status`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `station` (`code`);
+  ADD KEY `station` (`code`),
+  ADD KEY `idConso` (`idConso`);
 
 --
 -- Index pour la table `statusConso`
